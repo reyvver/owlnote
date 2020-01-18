@@ -17,6 +17,9 @@
                   <e p="firebase-auth-unity" t="Include">
                     <e p="maven-metadata.xml" t="Include" />
                   </e>
+                  <e p="firebase-database-unity" t="Include">
+                    <e p="maven-metadata.xml" t="Include" />
+                  </e>
                 </e>
               </e>
             </e>
@@ -24,8 +27,16 @@
         </e>
         <e p="Scripts" t="Include">
           <e p="DatabaseScript.cs" t="Include" />
+          <e p="LogOut.cs" t="Include" />
+          <e p="MainScreenScene.cs" t="Include" />
+          <e p="ManagmentCategories.cs" t="Include" />
+          <e p="OnLoad.cs" t="Include" />
           <e p="RegistrationScript.cs" t="Include" />
           <e p="ScenesTransition.cs" t="Include" />
+          <e p="TimeLineScript.cs" t="Include" />
+        </e>
+        <e p="Shaders" t="Include">
+          <e p="Blur Shader.shader" t="Include" />
         </e>
         <e p="TextMesh Pro" t="Include">
           <e p="Examples &amp; Extras" t="Include">

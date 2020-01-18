@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "212957380704",
+    "firebase_url": "https://owlnote-dragunovatv.firebaseio.com",
+    "project_id": "owlnote-dragunovatv",
+    "storage_bucket": "owlnote-dragunovatv.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:212957380704:android:b25798e736094d695b4305",
+        "android_client_info": {
+          "package_name": "com.study.dragunova.owlnote"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "212957380704-lkp5ce2aun34uqp0hr7dt0cd8gkv0ia2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.study.dragunova.owlnote",
+            "certificate_hash": "c7b8a6d23f81a6c0503a6013d0e96caa4b8d3da2"
+          }
+        },
+        {
+          "client_id": "212957380704-b5ucfk11rr5mb5gav71n9u2h4bj4ifjb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7cVibrPOGTBdWrMjGOyeNcbSzOJkc6lw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "212957380704-b5ucfk11rr5mb5gav71n9u2h4bj4ifjb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "212957380704-lbgqkhlep8hd2gh2ntg78bdti127m808.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.study.dragunova.owlnote.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

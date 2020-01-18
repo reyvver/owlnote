@@ -5,21 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class ScenesTransition : MonoBehaviour
 {
-
-    public int NumberOfScene;
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    public void MovedTo()
+    public void MovedTo(int NumberOfScene)
     {
         SceneManager.LoadScene(NumberOfScene);
     }
