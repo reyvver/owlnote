@@ -23,4 +23,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/ManagmentCategories Scene.unity
     guid: 2b4177f2cfec6a441940c1240a686d4b
+  - enabled: 1
+    path: Assets/Scenes/ManagmentTeplates Scene.unity
+    guid: 4285c53b11e7ba44cb9b301ad5df3e71
   m_configObjects: {}

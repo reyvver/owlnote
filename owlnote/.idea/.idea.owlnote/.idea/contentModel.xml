@@ -31,6 +31,7 @@
           <e p="MainScreenScene.cs" t="Include" />
           <e p="ManagmentCategories.cs" t="Include" />
           <e p="OnLoad.cs" t="Include" />
+          <e p="PanelSwitcher.cs" t="Include" />
           <e p="RegistrationScript.cs" t="Include" />
           <e p="ScenesTransition.cs" t="Include" />
           <e p="TimeLineScript.cs" t="Include" />
