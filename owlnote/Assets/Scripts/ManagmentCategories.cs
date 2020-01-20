@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Firebase;
 using Firebase.Auth;
 using Firebase.Database;
@@ -31,9 +33,10 @@ public class ManagmentCategories : MonoBehaviour
     public Transform panel;
     public TextMeshProUGUI name, color, description;
 
+    private List<int> categoriesId = new List<int>();
     private bool HideOrShow = false;
     private int currentCount;
-    private float startPositionX = -334, startPositionY = 225, space = 0; 
+    private float startPositionX = -17, startPositionY = 700, space = 0; 
     
     private DatabaseReference myRef;
 
@@ -43,7 +46,6 @@ public class ManagmentCategories : MonoBehaviour
        HideOtherStaff.SetActive(HideOrShow);
        InitializeDatabase();
        GetCurrentCount();
-
     }
     /*Соединяется с БД*/
     private void InitializeDatabase()
@@ -102,6 +104,31 @@ public class ManagmentCategories : MonoBehaviour
                 }
             });
     }
+    /*Возвращает все id*/
+    public void GetCategoriesId()
+    {
+        DatabaseReference rf = myRef.Child(FirebaseAuth.DefaultInstance.CurrentUser.UserId).Child("categories");
+        rf.GetValueAsync().ContinueWith(task => {
+                if (task.IsFaulted)
+                {
+                    currentCount = -1;
+                }
+                else if (task.IsCompleted) {
+                    DataSnapshot snapshot = task.Result;
+                    foreach (var childSnapshot in snapshot.Children)
+                    {
+                        var id = childSnapshot.Key;
+                        Regex rg = new Regex(@"\D");
+                        if (!rg.IsMatch(id))
+                        {
+                            categoriesId.Add(Convert.ToInt32(id));
+                        }
+                    }
+                    Debug.Log(categoriesId.Count);
+                }
+            });
+        Debug.Log(categoriesId.Count);
+    }
     /*Обновить после выполнения операции добавления или удаления*/
     private void UpdateCurrentCount(int newNumber)
     {
@@ -124,28 +151,47 @@ public class ManagmentCategories : MonoBehaviour
         color.text = "красный";
     }
     /*Визуализация*/
-    public void UpdateCategoriesList()
+    public void ViewCategories()
     {
+       // categoriesId.Clear();
+        GetCategoriesId();
+        GenerateCategories();
+    }
+
+    private void GenerateCategories()
+    {
+
         try
         {
             for (int i = 0; i < currentCount; i++)
             {
-                myPrefab.gameObject.transform.Find("CategoryName").GetComponent<TextMeshProUGUI>().text =
-                    GetValues(i, "name");
-                myPrefab.gameObject.transform.Find("CategoryDetailes").GetComponent<TextMeshProUGUI>().text =
-                    GetValues(i, "description");
-                myPrefab.gameObject.transform.Find("CategoryColor").GetComponent<Image>().color = Color.blue;
-                
-                GameObject myobj = Instantiate(myPrefab, new Vector3(startPositionX, startPositionY-space, 0), Quaternion.identity) as GameObject;
+                GameObject myobj = Instantiate(myPrefab, new Vector3(startPositionX, (startPositionY-space), 0), Quaternion.identity) as GameObject;
                 myobj.transform.SetParent(panel.transform,false);
-                space += 255;
+                space += 260;
             }
+
+          //  GenerateTextCategories();
         }
         catch (Exception e)
         {
             Debug.Log(e);
         }
+    }
+    private void GenerateTextCategories()
+    {  
+        GameObject panel = GameObject.Find("ListOfCategories");
+        int i = 0;
+        foreach (Transform obj in  panel.transform)
+        {
+            GameObject name = obj.Find("CategoryName").gameObject;
+            GameObject description = obj.Find("CategoryDescription").gameObject;
+            GameObject color = obj.Find("CategoryColor").gameObject;
 
+            name.GetComponent<TextMeshProUGUI>().text = GetValues(categoriesId[i], "name");
+            description.GetComponent<TextMeshProUGUI>().text = GetValues(categoriesId[i], "description");
+            color.GetComponent<Image>().color = Color.cyan;
+            i++;
+        }
     }
     /*Получить значение свойства текущей категории*/
     private string GetValues(int id,string propety)
@@ -160,7 +206,6 @@ public class ManagmentCategories : MonoBehaviour
                 else if (task.IsCompleted) {
                     DataSnapshot snapshot = task.Result;
                     result = snapshot.Value.ToString();
-                    Debug.Log(snapshot.Value);
                 }
             });
         return result;
