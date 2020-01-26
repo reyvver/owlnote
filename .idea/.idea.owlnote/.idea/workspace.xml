@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="38d91489-5385-4407-8b8f-9eaf8a66a0aa" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand />
+    <select />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$USER_HOME$/Downloads/unity_5_blur.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/Documents/unity/NATK/Assets/Scripts/StudyProcess.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/Documents/unity/NATK/Assets/Scripts/Gallery.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/Desktop/database/testapp/Assets/Firebase/Sample/Database/UIHandler.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/Documents/unity/NATK/Assets/Scripts/MainMenu.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/Desktop/testapp/Assets/Firebase/Sample/Auth/UIHandler.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/Documents/unity/NATK/Assets/Scripts/AboutColledge.cs" root0="SKIP_HIGHLIGHTING" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/Assets/DatabaseScript.cs" />
+        <option value="$PROJECT_DIR$/Assets/My files/Scripts/ScenesTransition.cs" />
+        <option value="$PROJECT_DIR$/Assets/My files/Scripts/DatabaseScript.cs" />
+        <option value="$PROJECT_DIR$/Assets/My files/Scripts/RegistrationScript.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/OnLoad.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/LogOut.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/MoveBack.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/ShowSettings.cs" />
+        <option value="$PROJECT_DIR$/Assets/Shaders/Blur Shader.shader" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/SettingsScene.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/ScenesTransition.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/CalendarScene.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/CalendarScriptDay.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/MainScreenScene.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/RegistrationScript.cs" />
+        <option value="$PROJECT_DIR$/Assets/Scripts/ManagmentCategories.cs" />
+      </list>
+    </option>
+  </component>
+  <component name="IgnoredFileRootStore">
+    <option name="generatedRoots">
+      <set>
+        <option value="D:\reysit\курсовой\owlnote\owlnote\.idea\.idea.owlnote\.idea" />
+      </set>
+    </option>
+  </component>
+  <component name="ProjectId" id="1WC5A80jMIO4AjaJyFVCpMARfPo" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="Discover.Launch.Via.Unity" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="TWShift.4" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.smartKeys_rider" />
+  </component>
+  <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
+    <configuration name="Attach to Unity Editor &amp; Play" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="UNITY_ATTACH_AND_PLAY" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
+      <option name="allowRunningInParallel" value="false" />
+      <option name="listenPortForConnections" value="false" />
+      <option name="pid" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
+      <option name="allowRunningInParallel" value="false" />
+      <option name="listenPortForConnections" value="false" />
+      <option name="pid" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="38d91489-5385-4407-8b8f-9eaf8a66a0aa" name="Default Changelist" comment="" />
+      <created>1578640589946</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1578640589946</updated>
+      <workItem from="1578640611128" duration="9684000" />
+      <workItem from="1578803448962" duration="5933000" />
+      <workItem from="1578810399650" duration="2018000" />
+      <workItem from="1578813246395" duration="4180000" />
+      <workItem from="1579003669561" duration="10112000" />
+      <workItem from="1579066613552" duration="2194000" />
+      <workItem from="1579088365874" duration="7339000" />
+      <workItem from="1579184896348" duration="1260000" />
+      <workItem from="1579270678361" duration="8146000" />
+      <workItem from="1579329804579" duration="8583000" />
+      <workItem from="1579409382890" duration="16765000" />
+      <workItem from="1579453562428" duration="3477000" />
+      <workItem from="1579487437321" duration="4606000" />
+      <workItem from="1579494270459" duration="23000" />
+      <workItem from="1579520059288" duration="5538000" />
+      <workItem from="1579877425149" duration="6042000" />
+      <workItem from="1579887211407" duration="2759000" />
+      <workItem from="1579965461073" duration="6515000" />
+      <workItem from="1580009526024" duration="1043000" />
+      <workItem from="1580015135492" duration="18444000" />
+      <workItem from="1580044407493" duration="4036000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="UnityProjectConfiguration" hasMinimizedUI="true" />
+  <component name="UnityUnitTestConfiguration" currentTestLauncher="EditMode" />
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="316" y="74" key="SettingsEditor" timestamp="1579432107140">
+      <screen x="78" y="0" width="1458" height="864" />
+    </state>
+    <state x="316" y="74" key="SettingsEditor/78.0.1458.864@78.0.1458.864" timestamp="1579432107140" />
+    <state x="489" y="37" width="636" height="789" key="find.popup" timestamp="1578806682341">
+      <screen x="78" y="0" width="1458" height="864" />
+    </state>
+    <state x="489" y="37" width="636" height="789" key="find.popup/78.0.1458.864@78.0.1458.864" timestamp="1578806682341" />
+    <state x="464" y="197" key="run.anything.popup" timestamp="1579968327900">
+      <screen x="78" y="0" width="1458" height="864" />
+    </state>
+    <state x="464" y="197" key="run.anything.popup/78.0.1458.864@78.0.1458.864" timestamp="1579968327900" />
+    <state x="470" y="181" width="672" height="678" key="search.everywhere.popup" timestamp="1580015946448">
+      <screen x="78" y="0" width="1458" height="864" />
+    </state>
+    <state x="470" y="181" width="672" height="678" key="search.everywhere.popup/78.0.1458.864@78.0.1458.864" timestamp="1580015946448" />
+  </component>
+</project>
