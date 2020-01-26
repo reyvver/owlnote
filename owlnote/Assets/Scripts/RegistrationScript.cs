@@ -133,6 +133,7 @@ public class RegistrationScript : MonoBehaviour {
       user = senderAuth.CurrentUser;
       userByAuth[senderAuth.App.Name] = user;
       if (signedIn) {
+        Debug.Log("sss");
         DebugLog("Signed in " + user.UserId);
         displayName = user.DisplayName ?? "";
         DisplayDetailedUserInfo(user, 1);
@@ -199,6 +200,7 @@ public class RegistrationScript : MonoBehaviour {
         DebugLog(String.Format("User Info: {0}  {1}", auth.CurrentUser.Email,
                                auth.CurrentUser.ProviderId));
         return UpdateUserProfileAsync(newDisplayName: newDisplayName);
+  
       }
     }
     // Nothing to update, so just return a completed Task.
@@ -217,6 +219,7 @@ public class RegistrationScript : MonoBehaviour {
         DisplayName = displayName,
         PhotoUrl = auth.CurrentUser.PhotoUrl,
       }).ContinueWith(HandleUpdateUserProfile);
+  
   }
 
   void HandleUpdateUserProfile(Task authTask) {
