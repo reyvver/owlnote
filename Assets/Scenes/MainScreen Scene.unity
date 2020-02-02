@@ -909,9 +909,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Monday
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 0a01ccc2a8d307a45a25ad9da8b7b37d, type: 2}
-  m_sharedMaterial: {fileID: 797179867208277418, guid: 0a01ccc2a8d307a45a25ad9da8b7b37d,
-    type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
+  m_sharedMaterial: {fileID: 2164040, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1403,9 +1402,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: November
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 0a01ccc2a8d307a45a25ad9da8b7b37d, type: 2}
-  m_sharedMaterial: {fileID: 797179867208277418, guid: 0a01ccc2a8d307a45a25ad9da8b7b37d,
-    type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
+  m_sharedMaterial: {fileID: 2164040, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1600,9 +1598,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 751986147}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6cca0a4b0867f6d43b155840e18fe731, type: 3}
+  m_Script: {fileID: 11500000, guid: e0aa53e7f81f81846a9e962983918105, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PreviousScene: 0
 --- !u!114 &751986152
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1647,12 +1646,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 751986151}
-        m_MethodName: MovedTo
+        m_MethodName: MoveTo
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 7
+          m_IntArgument: 6
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -3265,7 +3264,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1528571531}
-        m_MethodName: MovedTo
+        m_MethodName: MoveTo
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3284,9 +3283,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1528571526}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6cca0a4b0867f6d43b155840e18fe731, type: 3}
+  m_Script: {fileID: 11500000, guid: e0aa53e7f81f81846a9e962983918105, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PreviousScene: 0
 --- !u!1 &1583930194
 GameObject:
   m_ObjectHideFlags: 0
