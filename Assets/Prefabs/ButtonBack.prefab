@@ -120,7 +120,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 5131455161612494079}
-        m_MethodName: MovedTo
+        m_MethodName: MoveTo
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -139,9 +139,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 768550878734777296}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6cca0a4b0867f6d43b155840e18fe731, type: 3}
+  m_Script: {fileID: 11500000, guid: e0aa53e7f81f81846a9e962983918105, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PreviousScene: 0
 --- !u!1 &6728345784798420985
 GameObject:
   m_ObjectHideFlags: 0
