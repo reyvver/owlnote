@@ -1,154 +1,100 @@
-﻿using System;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Firebase;
 using Firebase.Auth;
 using Firebase.Database;
 using Firebase.Unity.Editor;
-using Firebase.Database;
-using Firebase.Extensions;
-using TMPro;
-using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class ManagmentCategoriesScene : MonoBehaviour
 {
-    private class Category
-    {
-        public string color, description;
-
-        public Category()
-        {
-        }
-
-        public Category(string color, string description)
-        {
-            this.color = color;
-            this.description = description;
-        }
-    }
 
     public GameObject AddNewCategoryPanel, HideOtherStaff;
-
     public GameObject ButtonAdd;
-
     public GameObject myPrefab;
-    public Transform panel;
-    private float startPositionX = -17, startPositionY = 700, space = 0;
-    public TextMeshProUGUI name, color, description;
-
-    private bool HideOrShow = false;
-    private List<string[]> valuesCategories = new List<string[]>();
-    private int currentCount = -1;
-
-
+    public Transform content;
+    public TextMeshProUGUI name;
+    public TextMeshProUGUI color;
+    public TextMeshProUGUI description;
+    
+    private bool _visibility;
+    private bool _dataReceived;
+    private List<string[]> valuesCategories = new List <string[]> ();
     private DatabaseReference myRef;
 
-    void Start()
-    {
-        AddNewCategoryPanel.SetActive(HideOrShow);
-        HideOtherStaff.SetActive(HideOrShow);
-        InitializeDatabase();
+    void Start() {
+        AddNewCategoryPanel.SetActive(_visibility);
+        HideOtherStaff.SetActive(_visibility);
+        initializeDatabase();
+        StartCoroutine(viewCategories());
     }
 
     /*Соединяется с БД*/
-    private void InitializeDatabase()
-    {
+    private void initializeDatabase() {
         FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://owlnote-dragunovatv.firebaseio.com/");
         myRef = FirebaseDatabase.DefaultInstance.RootReference;
     }
 
     /*Операции с данными*/
-    public void DatabaseOperations(string operation)
-    {
-        switch (operation)
-        {
-            case "adding":
-            {
-                AddNewCategory();
+    public void databaseOperations(string operation) {
+        switch (operation) {
+            case "adding": {
+                addNewCategory();
                 break;
             }
-            case "editing":
-            {
-                ShowAddMenu();
+            case "editing": {
+                showAddMenu();
                 break;
             }
-            case "deleting":
-            {
+            case "deleting": {
                 break;
             }
         }
-
     }
 
     /*Добавить новую категорию в бд*/
-    private void AddNewCategory()
-    {
-        Category newCategory = new Category(color.text, description.text);
+    private void addNewCategory() {
+        string [] newCategory = {color.text, description.text};
         string json = JsonUtility.ToJson(newCategory);
         myRef.Child(FirebaseAuth.DefaultInstance.CurrentUser.UserId).Child("categories").Child(name.text)
             .SetRawJsonValueAsync(json);
-        ShowAddMenu();
-        ClearTextBoxes();
+        showAddMenu();
+        clearTextBoxes();
     }
 
-    private void ClearTextBoxes()
-    {
+    private void clearTextBoxes() {
         name.text = "";
         description.text = "";
         color.text = "красный";
     }
 
-    public void ShowAddMenu()
-    {
-        HideOrShow = !HideOrShow;
-        AddNewCategoryPanel.SetActive(HideOrShow);
-        HideOtherStaff.SetActive(HideOrShow);
+    public void showAddMenu() {
+        _visibility = !_visibility;
+        AddNewCategoryPanel.SetActive(_visibility);
+        HideOtherStaff.SetActive(_visibility);
 
-        if (HideOrShow)
-        {
+        if (_visibility) {
             ButtonAdd.transform.Rotate(0, 0, -45);
         }
-        else
-        {
+        else {
             ButtonAdd.transform.Rotate(0, 0, 45);
         }
     }
 
-    public async void ViewCategories()
+    IEnumerator viewCategories()
     {
-       //await Task.Run(() => GetCount());
-       //Debug.Log(currentCount);
-        await Task.Run(() => GetData());
-        Debug.Log(valuesCategories.Count);
-        GenerateCategories();
+       getData();
+       yield return new WaitUntil(() => _dataReceived);
+       generateCategories();
     }
 
-    public void GetCount()
+    private void getData()
     {
+        _dataReceived = false;
         DatabaseReference newRef = myRef.Child(FirebaseAuth.DefaultInstance.CurrentUser.UserId).Child("categories")
             .Reference;
-        newRef.GetValueAsync().ContinueWithOnMainThread(task =>
-        {
-            if (task.IsFaulted)
-            {
-                // Handle the error...
-            }
-            else if (task.IsCompleted)
-            {
-                DataSnapshot snapshot = task.Result;
-                currentCount = Convert.ToInt32(snapshot.ChildrenCount);
-            }
-        });
-        Thread.Sleep(200);
-    }
-
-    private void GetData()
-    {
-        DatabaseReference newRef = myRef.Child(FirebaseAuth.DefaultInstance.CurrentUser.UserId).Child("categories").Reference;
         newRef.GetValueAsync().ContinueWith(task =>
         {
             if (task.IsFaulted)
@@ -168,26 +114,22 @@ public class ManagmentCategoriesScene : MonoBehaviour
                     string[] values = {name, description, color};
                     valuesCategories.Add(values);
                 }
+
+                _dataReceived = true;
             }
         });
-        Thread.Sleep(300);
     }
 
-    public void GenerateCategories()
-    {
-        for (int i = 0; i < valuesCategories.Count; i++)
-        {
-            GameObject myobj = Instantiate(myPrefab, new Vector3(startPositionX, (startPositionY - space), 0),
-                Quaternion.identity) as GameObject;
-            myobj.transform.SetParent(panel.transform, false);
-            space += 260;
-            GenerateTextCategories(i);
+    public void generateCategories() {
+        for (int i = 0; i < valuesCategories.Count; i++) {
+            GameObject a = Instantiate(myPrefab); 
+            a.transform.SetParent(content.transform, false);
+            generateTextCategories(i);
         }
     }
 
-    private void GenerateTextCategories(int i)
-    {
-        Transform obj = panel.GetChild(panel.childCount - 1);
+    private void generateTextCategories(int i) { 
+        Transform obj = content.GetChild(content.childCount - 1);
         GameObject nameO = obj.Find("CategoryName").gameObject;
         GameObject descriptionO = obj.Find("CategoryDescription").gameObject;
         GameObject colorO = obj.Find("CategoryColor").gameObject;
