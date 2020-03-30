@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources tools:keep="@string/firebase_database_url,@string/gcm_defaultSenderId,@string/google_storage_bucket,@string/project_id,@string/google_api_key,@string/google_crash_reporting_api_key,@string/google_app_id,@string/default_web_client_id" xmlns:tools="http://schemas.android.com/tools">
+  <string name="firebase_database_url" translatable="false">https://owlnote-dragunovatv.firebaseio.com</string>
+  <string name="gcm_defaultSenderId" translatable="false">212957380704</string>
+  <string name="google_storage_bucket" translatable="false">owlnote-dragunovatv.appspot.com</string>
+  <string name="project_id" translatable="false">owlnote-dragunovatv</string>
+  <string name="google_api_key" translatable="false">AIzaSyD7cVibrPOGTBdWrMjGOyeNcbSzOJkc6lw</string>
+  <string name="google_crash_reporting_api_key" translatable="false">AIzaSyD7cVibrPOGTBdWrMjGOyeNcbSzOJkc6lw</string>
+  <string name="google_app_id" translatable="false">1:212957380704:android:b25798e736094d695b4305</string>
+  <string name="default_web_client_id" translatable="false">212957380704-b5ucfk11rr5mb5gav71n9u2h4bj4ifjb.apps.googleusercontent.com</string>
+</resources>

@@ -15,7 +15,7 @@ public class SceneTransition : MonoBehaviour
         public void MoveTo(int NumberOfScene)
         {
                 PreviousScene = SceneManager.GetActiveScene().buildIndex;
-                Debug.Log(PreviousScene);
+                //Debug.Log(PreviousScene);
                 SceneManager.LoadScene(NumberOfScene);
         }
 }

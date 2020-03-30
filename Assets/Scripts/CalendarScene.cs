@@ -49,22 +49,27 @@ public class CalendarScene : MonoBehaviour
     private void ViewCalendar()
     {
         DateTime firstday = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-        int day = Convert.ToInt32( firstday.DayOfWeek);
+        int day = Convert.ToInt32(firstday.DayOfWeek);
         int month = firstday.Month;
         int currentDay = 1;
         int start;
         bool chk = false;
+
         // Debug.Log( day + "  " + NumberOfDaysInMonths[month - 1]+ "  "+ Difference(day) + "  "+currentDay);
         /*Заполнить текущий месяц*/
-        for (int i = 1; i<=6; i++)
+        for (int i = 1; i<=7; i++)
         {
             GameObject week = GameObject.Find("Week" + i);
-
-            if (i == 1) start = day; else start = 1;
+            if (i == 1)
+            {
+                if (day == 0) day = 7;
+                 start = day;
+            } 
+            else start = 1;
             
             for (int j = start; j <= 7; j++)
             {
-                Transform date = week.transform.Find(j.ToString());
+                Transform date = week.transform.Find(Convert.ToString(j));
                 TextMeshProUGUI numberText = date.Find("Number").GetComponent<TextMeshProUGUI>();
                 if (DateTime.Today.Day == currentDay)
                 {

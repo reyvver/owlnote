@@ -46,7 +46,7 @@ public class MainScreenScene : MonoBehaviour
         int currentMonth = DateTime.Today.Month;
         int daysCount = NumberOfDaysInMonths[currentMonth-1];
 
-        GameObject.Find("NumberPlate0").transform.Find("BackPanel").GetComponent<Image>().color = new Color32(175, 96, 255, 255);
+        GameObject.Find("NumberPlate0").transform.Find("BackPanel").GetComponent<Image>().color = new Color32(144, 96, 255, 255);
         GameObject.Find("NumberPlate0").transform.Find("Number").GetComponent<TextMeshProUGUI>().color = new Color32(255,255,255,255);
         GameObject.Find("NumberPlate0").transform.Find("Text").GetComponent<TextMeshProUGUI>().color = new Color32(255,255,255,255);
         

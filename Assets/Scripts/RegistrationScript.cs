@@ -13,22 +13,19 @@
 // limitations under the License.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class RegistrationScript : MonoBehaviour {
 
   protected Firebase.Auth.FirebaseAuth auth;
-  //private Firebase.Auth.FirebaseAuth otherAuth;
   protected Dictionary<string, Firebase.Auth.FirebaseUser> userByAuth = new Dictionary<string, Firebase.Auth.FirebaseUser>();
   private string logText = "";
-    public TextMeshProUGUI emailText;
-    public TextMeshProUGUI passwordText;
+  public TextMeshProUGUI emailText;
+  public TextMeshProUGUI passwordText;
   protected string email = "";
   protected string password = "";
   protected string displayName = "";
@@ -87,37 +84,6 @@ public class RegistrationScript : MonoBehaviour {
     }
   }
 
-  // Display user information.
-  void DisplayUserInfo(Firebase.Auth.IUserInfo userInfo, int indentLevel) {
-    string indent = new String(' ', indentLevel * 2);
-    var userProperties = new Dictionary<string, string> {
-      {"Display Name", userInfo.DisplayName},
-      {"Email", userInfo.Email},
-      {"Photo URL", userInfo.PhotoUrl != null ? userInfo.PhotoUrl.ToString() : null},
-      {"Provider ID", userInfo.ProviderId},
-      {"User ID", userInfo.UserId}
-    };
-    foreach (var property in userProperties) {
-      if (!String.IsNullOrEmpty(property.Value)) {
-        DebugLog(String.Format("{0}{1}: {2}", indent, property.Key, property.Value));
-      }
-    }
-  }
-
-  // Display a more detailed view of a FirebaseUser.
-  void DisplayDetailedUserInfo(Firebase.Auth.FirebaseUser user, int indentLevel) {
-    DisplayUserInfo(user, indentLevel);
-    DebugLog("  Anonymous: " + user.IsAnonymous);
-    DebugLog("  Email Verified: " + user.IsEmailVerified);
-    var providerDataList = new List<Firebase.Auth.IUserInfo>(user.ProviderData);
-    if (providerDataList.Count > 0) {
-      DebugLog("  Provider Data:");
-      foreach (var providerData in user.ProviderData) {
-        DisplayUserInfo(providerData, indentLevel + 1);
-      }
-    }
-  }
-
   // Track state changes of the auth object.
   void AuthStateChanged(object sender, System.EventArgs eventArgs) {
     Firebase.Auth.FirebaseAuth senderAuth = sender as Firebase.Auth.FirebaseAuth;
@@ -136,7 +102,6 @@ public class RegistrationScript : MonoBehaviour {
         Debug.Log("sss");
         DebugLog("Signed in " + user.UserId);
         displayName = user.DisplayName ?? "";
-        DisplayDetailedUserInfo(user, 1);
         SceneManager.LoadSceneAsync(3);
       }
     }
@@ -218,82 +183,7 @@ public class RegistrationScript : MonoBehaviour {
     return auth.CurrentUser.UpdateUserProfileAsync(new Firebase.Auth.UserProfile {
         DisplayName = displayName,
         PhotoUrl = auth.CurrentUser.PhotoUrl,
-      }).ContinueWith(HandleUpdateUserProfile);
-  
-  }
-
-  void HandleUpdateUserProfile(Task authTask) {
-    if (LogTaskCompletion(authTask, "User profile")) {
-      DisplayDetailedUserInfo(auth.CurrentUser, 1);
-    }
-  }
-
-  public void SigninAsync() {
-    DebugLog(String.Format("Attempting to sign in as {0}...", email));
-      auth.SignInWithEmailAndPasswordAsync(email, password).ContinueWith(HandleSigninResult);
-  }
-
-  void HandleSigninResult(Task<Firebase.Auth.FirebaseUser> authTask) {
-    LogTaskCompletion(authTask, "Sign-in");
-  }
-
-  public void ReloadUser() {
-    if (auth.CurrentUser == null) {
-      DebugLog("Not signed in, unable to reload user.");
-      return;
-    }
-    DebugLog("Reload User Data");
-    auth.CurrentUser.ReloadAsync().ContinueWith(HandleReloadUser);
-  }
-
-  void HandleReloadUser(Task authTask) {
-    if (LogTaskCompletion(authTask, "Reload")) {
-      DisplayDetailedUserInfo(auth.CurrentUser, 1);
-    }
-  }
-
-  public void GetUserToken() {
-    if (auth.CurrentUser == null) {
-      DebugLog("Not signed in, unable to get token.");
-      return;
-    }
-    DebugLog("Fetching user token");
-    fetchingToken = true;
-    auth.CurrentUser.TokenAsync(false).ContinueWith(HandleGetUserToken);
-  }
-
-  void HandleGetUserToken(Task<string> authTask) {
-    fetchingToken = false;
-    if (LogTaskCompletion(authTask, "User token fetch")) {
-      DebugLog("Token = " + authTask.Result);
-    }
-  }
-
-  void GetUserInfo() {
-    if (auth.CurrentUser == null) {
-      DebugLog("Not signed in, unable to get info.");
-    } else {
-      DebugLog("Current user info:");
-      DisplayDetailedUserInfo(auth.CurrentUser, 1);
-    }
-  }
-
-  public void SignOut() {
-    DebugLog("Signing out.");
-    auth.SignOut();
-    SceneManager.LoadScene(2);
-  }
-
-  // Show the providers for the current email address.
-  public void DisplayProvidersForEmail() {
-    auth.FetchProvidersForEmailAsync(email).ContinueWith((authTask) => {
-        if (LogTaskCompletion(authTask, "Fetch Providers")) {
-          DebugLog(String.Format("Email Providers for '{0}':", email));
-          foreach (string provider in authTask.Result)
-          {
-            DebugLog(provider);
-          }
-        }
       });
+  
   }
 }
