@@ -20,9 +20,7 @@ public class MainScreenScene : MonoBehaviour
         GetDates();
     }
     // Update is called once per frame
-    void Update()
-    {
-        
+    void Update () {
     }
     /*Выводит всю информацию о месяце, датах и тд в текстовые инпуты, которые есть на сцене*/
     public void GetDates()

@@ -10,6 +10,7 @@ using UnityEngine.SceneManagement;
 
 public class OnLoad: MonoBehaviour
 {
+   public GameObject ClickLabel;
    private void Start()
    {
       FirebaseAuth.DefaultInstance.StateChanged += HandleAuthStateChanged;
@@ -30,5 +31,9 @@ public class OnLoad: MonoBehaviour
    {
       if (FirebaseAuth.DefaultInstance.CurrentUser != null)
          SceneManager.LoadScene(3);
+      else
+      {
+         ClickLabel.SetActive(true);
+      }
    }
 }
