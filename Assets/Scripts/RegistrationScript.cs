@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Firebase.Auth;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -24,12 +25,14 @@ public class RegistrationScript : MonoBehaviour {
   protected Firebase.Auth.FirebaseAuth auth;
   protected Dictionary<string, Firebase.Auth.FirebaseUser> userByAuth = new Dictionary<string, Firebase.Auth.FirebaseUser>();
   private string logText = "";
-  public TextMeshProUGUI emailText;
-  public TextMeshProUGUI passwordText;
-  protected string email = "";
+  public TMP_InputField loginText, passwordText, verifyText;
+  public TMP_Text errorText;
+  protected string login = "";
   protected string password = "";
   protected string displayName = "";
   private bool fetchingToken = false;
+
+  private bool checkChoice = false;
 
   const int kMaxLogSize = 16382;
   Firebase.DependencyStatus dependencyStatus = Firebase.DependencyStatus.UnavailableOther;
@@ -49,6 +52,7 @@ public class RegistrationScript : MonoBehaviour {
     });
   }
 
+
   // Handle initialization of the necessary firebase modules:
   void InitializeFirebase() {
     DebugLog("Setting up Firebase Auth");
@@ -60,8 +64,11 @@ public class RegistrationScript : MonoBehaviour {
 
   // Exit if escape (or back, on mobile) is pressed.
   public void Update() {
-
-        email = emailText.text;
+    if (Input.GetKeyDown(KeyCode.Escape))
+    {
+      SceneManager.LoadScene(2);
+    }
+        login = loginText.text;
         password = passwordText.text;
   }
 
@@ -100,6 +107,7 @@ public class RegistrationScript : MonoBehaviour {
         Debug.Log("sss");
         DebugLog("Signed in " + user.UserId);
         displayName = user.DisplayName ?? "";
+        
         SceneManager.LoadSceneAsync(3);
       }
     }
@@ -145,15 +153,20 @@ public class RegistrationScript : MonoBehaviour {
   }
 
   public void CreateUserAsync() {
-    DebugLog(String.Format("Attempting to create user {0}...", email));
+   // DebugLog(String.Format("Attempting to create user {0}...", login));
 
     // This passes the current displayName through to HandleCreateUserAsync
     // so that it can be passed to UpdateUserProfile().  displayName will be
     // reset by AuthStateChanged() when the new user is created and signed in.
-    string newDisplayName = displayName;
-    auth.CreateUserWithEmailAndPasswordAsync(email, password).ContinueWith((task) => {
-        return HandleCreateUserAsync(task, newDisplayName: newDisplayName);
-      }).Unwrap();
+    
+   if (CheckInput())
+    {
+     string newDisplayName = displayName;
+     auth.CreateUserWithEmailAndPasswordAsync(loginText.text, password).ContinueWith((task) => {
+       return HandleCreateUserAsync(task, newDisplayName: newDisplayName);
+     }).Unwrap();
+    }
+
   }
 
   Task HandleCreateUserAsync(Task<Firebase.Auth.FirebaseUser> authTask,
@@ -162,6 +175,21 @@ public class RegistrationScript : MonoBehaviour {
       if (auth.CurrentUser != null) {
         DebugLog(String.Format("User Info: {0}  {1}", auth.CurrentUser.Email,
                                auth.CurrentUser.ProviderId));
+        
+        auth.CurrentUser.SendEmailVerificationAsync().ContinueWith(task => {
+            if (task.IsCanceled) {
+              Debug.LogError("SendEmailVerificationAsync was canceled.");
+              return;
+            }
+            if (task.IsFaulted) {
+              Debug.LogError("SendEmailVerificationAsync encountered an error: " + task.Exception);
+              return;
+            }
+            Debug.Log("Email sent successfully.");
+          });
+        
+
+        
         return UpdateUserProfileAsync(newDisplayName: newDisplayName);
   
       }
@@ -182,6 +210,32 @@ public class RegistrationScript : MonoBehaviour {
         DisplayName = displayName,
         PhotoUrl = auth.CurrentUser.PhotoUrl,
       });
-  
   }
+
+
+  private bool CheckInput()
+  {
+    if (passwordText.text !="" &&  verifyText.text !="" && loginText.text!="")
+    {
+      if (passwordText.text != verifyText.text)
+      {
+        errorText.color = Color.red;
+        errorText.text = "Ошибка: Пароли не совпадают";
+        return false;
+      }
+      else
+      {
+        errorText.color = Color.white;
+        return true;
+      }
+    }
+    else
+    {
+      errorText.color = Color.red;
+      errorText.text = "Ошибка: Не все поля заполнены";
+      return false;
+    }
+  }
+
+
 }

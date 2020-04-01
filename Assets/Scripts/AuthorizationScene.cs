@@ -16,14 +16,11 @@ public class AuthorizationScene : MonoBehaviour
 
     void Update()
     {
-        if (Application.platform == RuntimePlatform.Android)
-        {
             if (Input.GetKeyDown(KeyCode.Escape) && _visibility)
             {
                 _visibility = !_visibility;
                 HideorShow(_visibility);
             }
-        }
     }
 
     private void HideorShow(bool var)

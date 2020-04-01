@@ -63,9 +63,6 @@ public class AuthorizationScript : MonoBehaviour {
 
   // Exit if escape (or back, on mobile) is pressed.
   public void Update() {
-    if (Input.GetKeyDown(KeyCode.Escape)) {
-      Application.Quit();
-    }
         email = emailText.text;
         password = passwordText.text;
   }

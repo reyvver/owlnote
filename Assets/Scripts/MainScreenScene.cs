@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 using System.Globalization;
+using Firebase.Auth;
 using TMPro;
 
 public class MainScreenScene : MonoBehaviour
@@ -12,15 +13,61 @@ public class MainScreenScene : MonoBehaviour
     private List<GameObject> NumberPlates = new List<GameObject>();
     private List<GameObject> NumberDays = new List<GameObject>();
     public TextMeshProUGUI tCurrentDay, tMonth, tDayOfWeek;
+    public TextMeshProUGUI verifyEmail;
+    public GameObject panelVerify, blurBackground, barrier;
+
+    private bool _chk_email;
+
     // Start is called before the first frame update
     void Start()
     {
-        //GameObject.Find("ScrollbarTime").GetComponent<Scrollbar>().size = (float)0.2;
         InitializeDays();
         GetDates();
+
+        StartCoroutine(CheckUserEmail());
     }
+
+    IEnumerator CheckUserEmail()
+    {
+        ReloadUser();
+        yield return new WaitUntil(() => _chk_email);
+        if (FirebaseAuth.DefaultInstance.CurrentUser.UserId != "AVATC0nCWxd1l3saRQhbdoTFjVI3")
+          {
+              FirebaseAuth.DefaultInstance.CurrentUser.ReloadAsync();
+              if (FirebaseAuth.DefaultInstance.CurrentUser.IsEmailVerified == false)
+               {
+                   panelVerify.SetActive(true);
+                   blurBackground.SetActive(true);
+                   barrier.SetActive(true);
+                   verifyEmail.text = FirebaseAuth.DefaultInstance.CurrentUser.Email;
+               }
+          }
+    }
+
+    private void ReloadUser()
+    {
+        FirebaseAuth.DefaultInstance.CurrentUser.ReloadAsync().ContinueWith(task => {
+            if (task.IsCanceled) {
+                Debug.LogError("Отменено");
+                return;
+            }
+            if (task.IsFaulted) {
+                Debug.LogError("Произошла ошибка:  " + task.Exception);
+                return;
+            }
+
+            _chk_email = true;
+        });
+    }
+
+
+
     // Update is called once per frame
     void Update () {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
     }
     /*Выводит всю информацию о месяце, датах и тд в текстовые инпуты, которые есть на сцене*/
     public void GetDates()
@@ -42,8 +89,7 @@ public class MainScreenScene : MonoBehaviour
         
         int currentDay = Convert.ToInt32(tCurrentDay.text);
         int currentMonth = DateTime.Today.Month;
-        int daysCount = NumberOfDaysInMonths[currentMonth-1];
-
+        
         GameObject.Find("NumberPlate0").transform.Find("BackPanel").GetComponent<Image>().color = new Color32(144, 96, 255, 255);
         GameObject.Find("NumberPlate0").transform.Find("Number").GetComponent<TextMeshProUGUI>().color = new Color32(255,255,255,255);
         GameObject.Find("NumberPlate0").transform.Find("Text").GetComponent<TextMeshProUGUI>().color = new Color32(255,255,255,255);
@@ -109,5 +155,6 @@ public class MainScreenScene : MonoBehaviour
     {
         return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(str.ToLower());
     }
+    
     
 }
