@@ -1,46 +1,36 @@
-﻿// Copyright 2016 Google Inc. All rights reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
+using Firebase.Auth;
 using UnityEngine.SceneManagement;
 
-public class AuthorizationScript : MonoBehaviour {
+public class UserAuthAndRegistrScript : MonoBehaviour {
 
-  protected Firebase.Auth.FirebaseAuth auth;
+  protected FirebaseAuth auth;
   //private Firebase.Auth.FirebaseAuth otherAuth;
-  protected Dictionary<string, Firebase.Auth.FirebaseUser> userByAuth = new Dictionary<string, Firebase.Auth.FirebaseUser>();
+  protected Dictionary<string, FirebaseUser> userByAuth = new Dictionary<string, FirebaseUser>();
   private string logText = "";
-  public TextMeshProUGUI emailText;
-  public TextMeshProUGUI passwordText;
-  protected string email = "";
-  protected string password = "";
+  public GameObject ClickLabel, PanelConfrim;
+  public TMP_InputField emailAuth, emailReg;
+  public TMP_InputField passwordAuth, passwordReg, verifyReg;
+  public TMP_InputField resetPassword;
+  public TMP_Text errorText;
+  
+  protected string emailA = "", emailR = "";
+  protected string passwordA = "", passwordR = "", verifyR;
   protected string displayName = "";
   private bool fetchingToken = false;
 
   const int kMaxLogSize = 16382;
   Firebase.DependencyStatus dependencyStatus = Firebase.DependencyStatus.UnavailableOther;
-
-  // When the app starts, check to make sure that we have
-  // the required dependencies to use Firebase, and if not,
-  // add them if possible.
+  
   public void Start() {
+    
+    FirebaseAuth.DefaultInstance.StateChanged += HandleAuthStateChanged;
+    CheckUser();
+    
     Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
       dependencyStatus = task.Result;
       if (dependencyStatus == Firebase.DependencyStatus.Available) {
@@ -51,11 +41,26 @@ public class AuthorizationScript : MonoBehaviour {
       }
     });
   }
+  
+  private void HandleAuthStateChanged(object sender, EventArgs e)
+  {
+    CheckUser();
+  }
 
+  private void CheckUser()
+  {
+    if (FirebaseAuth.DefaultInstance.CurrentUser != null)
+      SceneManager.LoadScene(1);
+    else
+    {
+      ClickLabel.SetActive(true);
+    }
+  }
+  
   // Handle initialization of the necessary firebase modules:
   void InitializeFirebase() {
     DebugLog("Setting up Firebase Auth");
-    auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
+    auth = FirebaseAuth.DefaultInstance;
     auth.StateChanged += AuthStateChanged;
     auth.IdTokenChanged += IdTokenChanged;
     AuthStateChanged(this, null);
@@ -63,14 +68,18 @@ public class AuthorizationScript : MonoBehaviour {
 
   // Exit if escape (or back, on mobile) is pressed.
   public void Update() {
-    if (Input.GetKeyDown(KeyCode.Escape)) {
-      Application.Quit();
-    }
-        email = emailText.text;
-        password = passwordText.text;
+       //для авторизации
+        emailA = emailAuth.text;
+        passwordA = passwordAuth.text;
+        
+        //для регистрации
+        emailR = emailReg.text;
+        passwordR = passwordReg.text;
+        verifyR = verifyReg.text;
   }
 
   void OnDestroy() {
+    FirebaseAuth.DefaultInstance.StateChanged -= HandleAuthStateChanged;
     auth.StateChanged -= AuthStateChanged;
     auth.IdTokenChanged -= IdTokenChanged;
     auth = null;
@@ -88,7 +97,7 @@ public class AuthorizationScript : MonoBehaviour {
   }
 
   // Display user information.
-  void DisplayUserInfo(Firebase.Auth.IUserInfo userInfo, int indentLevel) {
+  void DisplayUserInfo(IUserInfo userInfo, int indentLevel) {
     string indent = new String(' ', indentLevel * 2);
     var userProperties = new Dictionary<string, string> {
       {"Display Name", userInfo.DisplayName},
@@ -105,11 +114,11 @@ public class AuthorizationScript : MonoBehaviour {
   }
 
   // Display a more detailed view of a FirebaseUser.
-  void DisplayDetailedUserInfo(Firebase.Auth.FirebaseUser user, int indentLevel) {
+  void DisplayDetailedUserInfo(FirebaseUser user, int indentLevel) {
     DisplayUserInfo(user, indentLevel);
     DebugLog("  Anonymous: " + user.IsAnonymous);
     DebugLog("  Email Verified: " + user.IsEmailVerified);
-    var providerDataList = new List<Firebase.Auth.IUserInfo>(user.ProviderData);
+    var providerDataList = new List<IUserInfo>(user.ProviderData);
     if (providerDataList.Count > 0) {
       DebugLog("  Provider Data:");
       foreach (var providerData in user.ProviderData) {
@@ -119,9 +128,9 @@ public class AuthorizationScript : MonoBehaviour {
   }
 
   // Track state changes of the auth object.
-  void AuthStateChanged(object sender, System.EventArgs eventArgs) {
-    Firebase.Auth.FirebaseAuth senderAuth = sender as Firebase.Auth.FirebaseAuth;
-    Firebase.Auth.FirebaseUser user = null;
+  void AuthStateChanged(object sender, EventArgs eventArgs) {
+    FirebaseAuth senderAuth = sender as FirebaseAuth;
+    FirebaseUser user = null;
     if (senderAuth != null) userByAuth.TryGetValue(senderAuth.App.Name, out user);
     if (senderAuth == auth && senderAuth.CurrentUser != user) {
       bool signedIn = user != senderAuth.CurrentUser && senderAuth.CurrentUser != null;
@@ -133,18 +142,17 @@ public class AuthorizationScript : MonoBehaviour {
       user = senderAuth.CurrentUser;
       userByAuth[senderAuth.App.Name] = user;
       if (signedIn) {
-        Debug.Log("sss");
         DebugLog("Signed in " + user.UserId);
         displayName = user.DisplayName ?? "";
         DisplayDetailedUserInfo(user, 1);
-        SceneManager.LoadSceneAsync(3);
+        SceneManager.LoadSceneAsync(1);
       }
     }
   }
 
   // Track ID token changes.
-  void IdTokenChanged(object sender, System.EventArgs eventArgs) {
-    Firebase.Auth.FirebaseAuth senderAuth = sender as Firebase.Auth.FirebaseAuth;
+  void IdTokenChanged(object sender, EventArgs eventArgs) {
+    FirebaseAuth senderAuth = sender as FirebaseAuth;
     if (senderAuth == auth && senderAuth.CurrentUser != null && !fetchingToken) {
       senderAuth.CurrentUser.TokenAsync(false).ContinueWith(
         task => DebugLog(String.Format("Token[0:8] = {0}", task.Result.Substring(0, 8))));
@@ -169,7 +177,7 @@ public class AuthorizationScript : MonoBehaviour {
             if (firebaseEx != null) {
 
                 authErrorCode = String.Format("AuthError.{0}: ",
-                ((Firebase.Auth.AuthError)firebaseEx.ErrorCode).ToString());
+                ((AuthError)firebaseEx.ErrorCode).ToString());
             }
         DebugLog(authErrorCode + exception.ToString());
         }
@@ -182,23 +190,41 @@ public class AuthorizationScript : MonoBehaviour {
   }
 
   public void CreateUserAsync() {
-    DebugLog(String.Format("Attempting to create user {0}...", email));
+    DebugLog(String.Format("Attempting to create user {0}...", emailR));
 
     // This passes the current displayName through to HandleCreateUserAsync
     // so that it can be passed to UpdateUserProfile().  displayName will be
     // reset by AuthStateChanged() when the new user is created and signed in.
-    string newDisplayName = displayName;
-    auth.CreateUserWithEmailAndPasswordAsync(email, password).ContinueWith((task) => {
+    if (CheckInput())
+    {
+      string newDisplayName = displayName;
+      auth.CreateUserWithEmailAndPasswordAsync(emailR, passwordR).ContinueWith((task) =>
+      {
         return HandleCreateUserAsync(task, newDisplayName: newDisplayName);
       }).Unwrap();
+    }
   }
 
-  Task HandleCreateUserAsync(Task<Firebase.Auth.FirebaseUser> authTask,
+  Task HandleCreateUserAsync(Task<FirebaseUser> authTask,
                              string newDisplayName = null) {
     if (LogTaskCompletion(authTask, "User Creation")) {
       if (auth.CurrentUser != null) {
         DebugLog(String.Format("User Info: {0}  {1}", auth.CurrentUser.Email,
                                auth.CurrentUser.ProviderId));
+        
+        auth.CurrentUser.SendEmailVerificationAsync().ContinueWith(task => {
+          if (task.IsCanceled) {
+            Debug.LogError("SendEmailVerificationAsync was canceled.");
+            return;
+          }
+          if (task.IsFaulted) {
+            Debug.LogError("SendEmailVerificationAsync encountered an error: " + task.Exception);
+            return;
+          }
+          Debug.Log("Email sent successfully.");
+        });
+        
+        
         return UpdateUserProfileAsync(newDisplayName: newDisplayName);
   
       }
@@ -229,11 +255,11 @@ public class AuthorizationScript : MonoBehaviour {
   }
 
   public void SigninAsync() {
-    DebugLog(String.Format("Attempting to sign in as {0}...", email));
-      auth.SignInWithEmailAndPasswordAsync(email, password).ContinueWith(HandleSigninResult);
+    DebugLog(String.Format("Attempting to sign in as {0}...", emailA));
+      auth.SignInWithEmailAndPasswordAsync(emailA, passwordA).ContinueWith(HandleSigninResult);
   }
 
-  void HandleSigninResult(Task<Firebase.Auth.FirebaseUser> authTask) {
+  void HandleSigninResult(Task<FirebaseUser> authTask) {
     LogTaskCompletion(authTask, "Sign-in");
   }
 
@@ -283,17 +309,74 @@ public class AuthorizationScript : MonoBehaviour {
     auth.SignOut();
     SceneManager.LoadScene(2);
   }
+  
+  public void ResetPassword()
+  {
+    string emailAddress = resetPassword.text;
 
-  // Show the providers for the current email address.
-  public void DisplayProvidersForEmail() {
-    auth.FetchProvidersForEmailAsync(email).ContinueWith((authTask) => {
-        if (LogTaskCompletion(authTask, "Fetch Providers")) {
-          DebugLog(String.Format("Email Providers for '{0}':", email));
-          foreach (string provider in authTask.Result)
-          {
-            DebugLog(provider);
-          }
+    if (emailAddress != "")
+    {   
+      FirebaseAuth.DefaultInstance.SendPasswordResetEmailAsync(emailAddress).ContinueWith(task =>
+      {
+        if (task.IsCanceled)
+        {
+          Debug.LogError("SendPasswordResetEmailAsync was canceled.");
+          return;
         }
+
+        if (task.IsFaulted)
+        {
+          Debug.LogError("SendPasswordResetEmailAsync encountered an error: " + task.Exception);
+          return;
+        }
+
+        Debug.Log("Password reset email sent successfully.");        
       });
+      GameObject.Find("SceneManager").GetComponent<UserAuthAndRegistrSceneManager>().ShowPanel(PanelConfrim);
+      ClearInputs();
+    }
+    else
+    {
+      GameObject.Find("ErrorMessagePasswordReset").GetComponent<TMP_Text>().text = "Заполните поле";
+      GameObject.Find("ErrorMessagePasswordReset").GetComponent<TMP_Text>().color = Color.red;
+    }
+    
   }
+  
+  private bool CheckInput()
+  {
+    if (passwordReg.text !="" &&  verifyReg.text !="" && emailReg.text!="")
+    {
+      if (passwordReg.text != verifyReg.text)
+      {
+        errorText.color = Color.red;
+        errorText.text = "Ошибка: Пароли не совпадают";
+        return false;
+      }
+      else
+      {
+        errorText.color = Color.white;
+        return true;
+      }
+    }
+    else
+    {
+      errorText.color = Color.red;
+      errorText.text = "Ошибка: Не все поля заполнены";
+      return false;
+    }
+  }
+
+  private void ClearInputs()
+  {
+   emailAuth.text  = "";
+   emailReg.text  = "";
+   passwordAuth.text  = "";
+   passwordReg.text  = "";
+   verifyReg.text  = "";
+    resetPassword.text = "";
+  }
+
+
+
 }

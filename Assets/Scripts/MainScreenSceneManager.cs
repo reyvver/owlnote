@@ -1,28 +1,48 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
 using System.Globalization;
 using TMPro;
 
-public class MainScreenScene : MonoBehaviour
+public class MainScreenSceneManager : MonoBehaviour
 {
     private List<int> NumberOfDaysInMonths = new List<int>();
     private List<GameObject> NumberPlates = new List<GameObject>();
     private List<GameObject> NumberDays = new List<GameObject>();
     public TextMeshProUGUI tCurrentDay, tMonth, tDayOfWeek;
+    public GameObject blurPanel, blurSuccess;
+    public GameObject panelSuccess;
+
+    public List<GameObject> openedPanels;
+
     // Start is called before the first frame update
     void Start()
     {
-        //GameObject.Find("ScrollbarTime").GetComponent<Scrollbar>().size = (float)0.2;
+        GameObject.Find("MainScene").transform.SetAsLastSibling();
         InitializeDays();
         GetDates();
     }
-    // Update is called once per frame
+
     void Update()
     {
-        
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (openedPanels.Count > 0)
+            {
+                if (openedPanels[openedPanels.Count - 1] == panelSuccess)
+                {
+                    GameObject.Find("SceneManager").GetComponent<LogOut>().LogOutUser();
+                }
+
+
+                openedPanels[openedPanels.Count - 1].SetActive(false);
+                openedPanels.RemoveAt(openedPanels.Count - 1);
+                blurPanel.SetActive(false);
+                blurSuccess.SetActive(false);
+            }
+        }
+
     }
     /*Выводит всю информацию о месяце, датах и тд в текстовые инпуты, которые есть на сцене*/
     public void GetDates()
@@ -44,8 +64,7 @@ public class MainScreenScene : MonoBehaviour
         
         int currentDay = Convert.ToInt32(tCurrentDay.text);
         int currentMonth = DateTime.Today.Month;
-        int daysCount = NumberOfDaysInMonths[currentMonth-1];
-
+        
         GameObject.Find("NumberPlate0").transform.Find("BackPanel").GetComponent<Image>().color = new Color32(144, 96, 255, 255);
         GameObject.Find("NumberPlate0").transform.Find("Number").GetComponent<TextMeshProUGUI>().color = new Color32(255,255,255,255);
         GameObject.Find("NumberPlate0").transform.Find("Text").GetComponent<TextMeshProUGUI>().color = new Color32(255,255,255,255);
@@ -111,5 +130,25 @@ public class MainScreenScene : MonoBehaviour
     {
         return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(str.ToLower());
     }
-    
+
+    public void ShowPanel(GameObject obj)
+    {
+        GameObject.Find("SceneManager").GetComponent<MainScreenScript>().ClearText();
+        openedPanels.Add(obj);
+        if (obj == panelSuccess)
+            blurSuccess.SetActive(true);
+        blurPanel.SetActive(true);
+        obj.SetActive(true);
+    }
+
+    public void ShowScene(GameObject obj)
+    {
+        obj.transform.SetAsLastSibling();
+    }
+
+    public void ClosePanel(GameObject obj)
+    {
+        blurPanel.SetActive(false);
+        obj.SetActive(false);
+    }
 }
