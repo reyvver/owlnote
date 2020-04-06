@@ -11,9 +11,9 @@ public class CalendarScriptDay : MonoBehaviour
     public void OnClick(GameObject obj)
     {
         CleanAll();
-       TextMeshProUGUI txt =  obj.gameObject.transform.Find("Number").GetComponent<TextMeshProUGUI>();
-       if (txt.text!="")
-        obj.gameObject.transform.Find("Panel").GetComponent<Image>().color = new Color32(255,96,253,255);
+        TextMeshProUGUI txt = obj.gameObject.transform.Find("Number").GetComponent<TextMeshProUGUI>();
+        if (txt.text != "")
+            obj.gameObject.transform.Find("Panel").GetComponent<Image>().color = new Color32(255, 96, 253, 255);
     }
 
     private void CleanAll()
@@ -29,7 +29,7 @@ public class CalendarScriptDay : MonoBehaviour
                 Image panel = date.Find("Panel").GetComponent<Image>();
                 if (DateTime.Today.Day.ToString() == numberText.text)
                 {
-                    panel.color = new Color32(174,96,255,255);
+                    panel.color = new Color32(146,96,255,255);
                     numberText.color = Color.white;
                 }
                 else
