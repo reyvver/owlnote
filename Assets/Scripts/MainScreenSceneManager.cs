@@ -134,6 +134,7 @@ public class MainScreenSceneManager : MonoBehaviour
     public void ShowPanel(GameObject obj)
     {
         GameObject.Find("SceneManager").GetComponent<MainScreenScript>().ClearText();
+        Debug.Log("da");
         openedPanels.Add(obj);
         if (obj == panelSuccess)
             blurSuccess.SetActive(true);

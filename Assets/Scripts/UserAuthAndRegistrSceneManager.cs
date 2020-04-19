@@ -21,7 +21,6 @@ public class UserAuthAndRegistrSceneManager : MonoBehaviour
             {
                 if (openedPanels[openedPanels.Count - 1] == PanelConfrim)
                 {
-                    Debug.Log("nani");
                     for (int i = 0; i < openedPanels.Count; i++)
                     {
                         openedPanels[i].SetActive(false);
