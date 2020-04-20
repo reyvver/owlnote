@@ -10,7 +10,7 @@ public class MainScreenScript : MonoBehaviour
 {
     public TextMeshProUGUI verifyEmail, errorLabelResetPassword, errorLabelDeleteAccount;
     public TextMeshProUGUI messageSuccess;
-    public GameObject panelSuccess, panelVerify, blurBackground, barrier;
+    public GameObject panelSuccess, panelVerify;
     public TMP_InputField passwordCurrent, passwordNew, verifyNew, verifyToDelete;
     private bool _chk_email, _reauthenticate, _passwordReset, _userDeleted;
 
@@ -37,8 +37,6 @@ public class MainScreenScript : MonoBehaviour
             if (currentUser.IsEmailVerified == false)
             {
                 panelVerify.SetActive(true);
-                blurBackground.SetActive(true);
-                barrier.SetActive(true);
                 verifyEmail.text = currentUser.Email;
             }
         }

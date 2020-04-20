@@ -12,13 +12,12 @@ public class CalendarScene : MonoBehaviour
     //  private List<int> NumberOfDaysInMonths = new List<int>();
     public TextMeshProUGUI monthText, nextText, previousText, currentYearText;
     private int[] daysPerMonth = new[] {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    private int currentYear, currentMonth;
+    public int currentYear, currentMonth;
 
     void Start()
     {
         currentYear = DateTime.Today.Year;
         currentMonth = DateTime.Today.Month;
-
         CheckTypeOfYear();
         FillCalendar();
         UpdateMonthTimeline();
@@ -26,6 +25,7 @@ public class CalendarScene : MonoBehaviour
 
     private void FillCalendar()
     {
+
         //Определяется день недели первого дня в месяце
         int firstDayOfWeek = (int) new DateTime(currentYear, currentMonth, 1).DayOfWeek;
         int currentDay = 1; //Номер дня (Будет менятся от 1 до 30 или 31)
