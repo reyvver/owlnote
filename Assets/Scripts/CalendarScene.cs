@@ -4,114 +4,147 @@ using UnityEngine.UI;
 using System;
 using System.Globalization;
 using TMPro;
+using UnityEngine.Rendering;
 
 public class CalendarScene : MonoBehaviour
 {
-    public TextMeshProUGUI tMonth, tDayOfWeek;
-    private List<int> NumberOfDaysInMonths = new List<int>();
+//    public TextMeshProUGUI tMonth, tDayOfWeek;
+    //  private List<int> NumberOfDaysInMonths = new List<int>();
+    public TextMeshProUGUI monthText, nextText, previousText, currentYearText;
+    private int[] daysPerMonth = new[] {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    public int currentYear, currentMonth;
 
-    // Start is called before the first frame update
     void Start()
     {
-        GetDates();
-        InitializeDays();
-        ViewCalendar();
-        Days();
+        currentYear = DateTime.Today.Year;
+        currentMonth = DateTime.Today.Month;
+        CheckTypeOfYear();
+        FillCalendar();
+        UpdateMonthTimeline();
     }
 
-    
-    private void GetDates()
+    private void FillCalendar()
     {
-        string day_of_week = CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(DateTime.Today.DayOfWeek);
-        string month = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(DateTime.Today.Month);
 
-        tMonth.text = ToTitleCase(month);
-        tDayOfWeek.text = ToTitleCase(day_of_week);
-    }
-
-    private void Days()
-    {
-        DateTimeFormatInfo dtfi = CultureInfo.CurrentCulture.DateTimeFormat;
-        GameObject.Find("Day1").GetComponent<TextMeshProUGUI>().text = dtfi.GetShortestDayName(DayOfWeek.Monday);
-        GameObject.Find("Day2").GetComponent<TextMeshProUGUI>().text = dtfi.GetShortestDayName(DayOfWeek.Tuesday);
-        GameObject.Find("Day3").GetComponent<TextMeshProUGUI>().text = dtfi.GetShortestDayName(DayOfWeek.Wednesday);
-        GameObject.Find("Day4").GetComponent<TextMeshProUGUI>().text = dtfi.GetShortestDayName(DayOfWeek.Thursday);
-        GameObject.Find("Day5").GetComponent<TextMeshProUGUI>().text = dtfi.GetShortestDayName(DayOfWeek.Friday);
-        GameObject.Find("Day6").GetComponent<TextMeshProUGUI>().text = dtfi.GetShortestDayName(DayOfWeek.Saturday);
-        GameObject.Find("Day7").GetComponent<TextMeshProUGUI>().text = dtfi.GetShortestDayName(DayOfWeek.Sunday);
-
-    }
-
-    private string ToTitleCase(string str)
-    {
-        return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(str.ToLower());
-    }
-    private void ViewCalendar()
-    {
-        DateTime firstday = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-        int day = Convert.ToInt32(firstday.DayOfWeek);
-        int month = firstday.Month;
-        int currentDay = 1;
-        int start;
-        bool chk = false;
-
-        // Debug.Log( day + "  " + NumberOfDaysInMonths[month - 1]+ "  "+ Difference(day) + "  "+currentDay);
-        /*Заполнить текущий месяц*/
-        for (int i = 1; i<=7; i++)
+        //Определяется день недели первого дня в месяце
+        int firstDayOfWeek = (int) new DateTime(currentYear, currentMonth, 1).DayOfWeek;
+        int currentDay = 1; //Номер дня (Будет менятся от 1 до 30 или 31)
+        bool chk = false; //Переменная для проверки полной заполненности месяца
+        if (firstDayOfWeek == 0) firstDayOfWeek = 7;
+        if (firstDayOfWeek == 6) firstDayOfWeek = 1;
+        //Для первой недели:
+        GameObject firstWeek = GameObject.Find("Week1");
+        for (int i = firstDayOfWeek; i <= 7; i++)
         {
-            GameObject week = GameObject.Find("Week" + i);
-            if (i == 1)
+            Transform date = firstWeek.transform.Find(Convert.ToString(i)); //день в неделе
+            TextMeshProUGUI numberText = date.Find("Number").GetComponent<TextMeshProUGUI>(); //находится его текстовое поле
+            numberText.text = currentDay.ToString(); //присваевается номер
+            ColourCurrentDay(date, currentDay);
+            currentDay++;
+        }
+
+        //Для последующих недель
+        for (int i = 2; i <= 6; i++)
+        {
+            GameObject week = GameObject.Find("Week" + i); //берется следующая неделя
+            for (int j = 1; j <= 7; j++)
             {
-                if (day == 0) day = 7;
-                 start = day;
-            } 
-            else start = 1;
-            
-            for (int j = start; j <= 7; j++)
-            {
-                Transform date = week.transform.Find(Convert.ToString(j));
-                TextMeshProUGUI numberText = date.Find("Number").GetComponent<TextMeshProUGUI>();
-                if (DateTime.Today.Day == currentDay)
-                {
-                   Image panel = date.Find("Panel").GetComponent<Image>();
-                   panel.color = new Color32(174,96,255,255);
-                   numberText.color = Color.white;
-                }
-                numberText.text = currentDay.ToString();
+                Transform date = week.transform.Find(Convert.ToString(j)); //день в неделе
+                TextMeshProUGUI
+                    numberText = date.Find("Number").GetComponent<TextMeshProUGUI>(); //находится его текстовое поле
+                numberText.text = currentDay.ToString(); //присваевается номер
+                ColourCurrentDay(date, currentDay);
 
                 currentDay++;
-                if (currentDay > NumberOfDaysInMonths[month - 1])
+                if (currentDay > daysPerMonth[currentMonth - 1])
                 {
                     chk = true;
-                    break;
+                    break; //выход из внутреннего цикла
                 }
             }
+
             if (chk)
-               break;
+                break; //выход из внешнего цикла
         }
     }
-    private void InitializeDays()
+
+    private void ColourCurrentDay(Transform date, int currentDay)
     {
-        NumberOfDaysInMonths.Add(31); //January
-        if (WhatTypeOfYear())
-            NumberOfDaysInMonths.Add(29);//February
-        else NumberOfDaysInMonths.Add(28);//February
-        NumberOfDaysInMonths.Add(31);//March
-        NumberOfDaysInMonths.Add(30);//April
-        NumberOfDaysInMonths.Add(31);//May
-        NumberOfDaysInMonths.Add(30);//June
-        NumberOfDaysInMonths.Add(31);//July
-        NumberOfDaysInMonths.Add(31);//August
-        NumberOfDaysInMonths.Add(30);//September
-        NumberOfDaysInMonths.Add(31);//October
-        NumberOfDaysInMonths.Add(30);//November
-        NumberOfDaysInMonths.Add(31);//December
+        if (DateTime.Today.Day == currentDay && currentMonth == DateTime.Today.Month && currentYear == DateTime.Today.Year) //закрашиваем сегодняшний день
+        {
+            TextMeshProUGUI
+                numberText = date.Find("Number").GetComponent<TextMeshProUGUI>(); //находится его текстовое поле
+            Image panel = date.Find("Panel").GetComponent<Image>();
+            panel.color = new Color32(146, 96, 255, 255);
+            numberText.color = Color.white;
+        }
     }
-    private bool WhatTypeOfYear()
+
+    private void CheckTypeOfYear() //Если год високосный, то в феврале 29 дней
     {
-        bool chk = false;
         if (DateTime.Today.Year % 4 == 0)
-            chk = true;
-        return chk;
+            daysPerMonth[1] = 29;
+    }
+
+    public void NextMonth()
+    {
+        ClearAll();
+        currentMonth++;
+        if (currentMonth == 13)
+        {
+            currentYear++;
+            currentMonth = 1;
+        }
+        UpdateMonthTimeline();
+        FillCalendar();
+    }
+
+    public void PreviousMonth()
+    {
+        ClearAll();
+        currentMonth--;
+        if (currentMonth == 0)
+        {
+            currentYear--;
+            currentMonth = 12;
+        }
+
+        UpdateMonthTimeline();
+        FillCalendar();
+    }
+
+    private void UpdateMonthTimeline()
+    {
+        int previous = currentMonth-1;
+        int next = currentMonth+1;
+        if (previous == 0) previous = 12;
+        if (next == 13) next = 1;
+        currentYearText.text = currentYear.ToString();
+        monthText.text = MonthName(currentMonth);
+        nextText.text = MonthName(next);
+        previousText.text =MonthName(previous);
+    }
+
+    private string MonthName(int index)
+    {
+        return CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(index);
+    }
+
+    private void ClearAll()
+    {
+        for (int i = 1; i <= 6; i++)
+        {
+            GameObject week = GameObject.Find("Week" + i); 
+            
+            for (int j = 1; j <= 7; j++)
+            {
+                Transform date = week.transform.Find(Convert.ToString(j));
+                TextMeshProUGUI numberText = date.Find("Number").GetComponent<TextMeshProUGUI>(); 
+                numberText.text = "";
+                Image panel = date.Find("Panel").GetComponent<Image>();
+                panel.color = new Color32(255,255,255,255);
+                numberText.color = Color.black;
+            }
+        }
     }
 }

@@ -11,7 +11,6 @@ public class MainScreenSceneManager : MonoBehaviour
     private List<GameObject> NumberPlates = new List<GameObject>();
     private List<GameObject> NumberDays = new List<GameObject>();
     public TextMeshProUGUI tCurrentDay, tMonth, tDayOfWeek;
-    public GameObject blurPanel, blurSuccess;
     public GameObject panelSuccess;
 
     public List<GameObject> openedPanels;
@@ -34,12 +33,8 @@ public class MainScreenSceneManager : MonoBehaviour
                 {
                     GameObject.Find("SceneManager").GetComponent<LogOut>().LogOutUser();
                 }
-
-
                 openedPanels[openedPanels.Count - 1].SetActive(false);
                 openedPanels.RemoveAt(openedPanels.Count - 1);
-                blurPanel.SetActive(false);
-                blurSuccess.SetActive(false);
             }
         }
 
@@ -135,9 +130,6 @@ public class MainScreenSceneManager : MonoBehaviour
     {
         GameObject.Find("SceneManager").GetComponent<MainScreenScript>().ClearText();
         openedPanels.Add(obj);
-        if (obj == panelSuccess)
-            blurSuccess.SetActive(true);
-        blurPanel.SetActive(true);
         obj.SetActive(true);
     }
 
@@ -148,7 +140,7 @@ public class MainScreenSceneManager : MonoBehaviour
 
     public void ClosePanel(GameObject obj)
     {
-        blurPanel.SetActive(false);
+       // blurPanel.SetActive(false);
         obj.SetActive(false);
     }
 }

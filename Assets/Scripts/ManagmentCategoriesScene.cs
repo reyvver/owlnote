@@ -4,6 +4,7 @@ using Firebase;
 using Firebase.Auth;
 using Firebase.Database;
 using Firebase.Unity.Editor;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -24,6 +25,19 @@ public class ManagmentCategoriesScene : MonoBehaviour
     private List<string[]> valuesCategories = new List <string[]> ();
     private DatabaseReference myRef;
 
+    public class categoryClass {
+        public string description;
+        public string colour;
+
+        public categoryClass() {
+        }
+
+        public categoryClass([CanBeNull] string description, string colour) {
+            this.description = description;
+            this.colour= colour;
+        }
+    }
+    
     void Start() {
         AddNewCategoryPanel.SetActive(_visibility);
         HideOtherStaff.SetActive(_visibility);
@@ -41,6 +55,7 @@ public class ManagmentCategoriesScene : MonoBehaviour
     public void databaseOperations(string operation) {
         switch (operation) {
             case "adding": {
+
                 addNewCategory();
                 break;
             }
@@ -55,13 +70,23 @@ public class ManagmentCategoriesScene : MonoBehaviour
     }
 
     /*Добавить новую категорию в бд*/
-    private void addNewCategory() {
+    public void addNewCategory()
+    {
+        Debug.Log("пытамся добавить");
+        Debug.Log(FirebaseAuth.DefaultInstance.CurrentUser.UserId);
+        Debug.Log(name.text+" "+ color.text+" "+ description.text);
+        categoryClass newobj = new categoryClass(description.text, color.text);
+        string json = JsonUtility.ToJson(newobj);
+        myRef.Child(FirebaseAuth.DefaultInstance.CurrentUser.UserId).Child("categories").Child(name.text)
+            .SetRawJsonValueAsync(json);
+        /*
         string [] newCategory = {color.text, description.text};
         string json = JsonUtility.ToJson(newCategory);
         myRef.Child(FirebaseAuth.DefaultInstance.CurrentUser.UserId).Child("categories").Child(name.text)
-            .SetRawJsonValueAsync(json);
-        showAddMenu();
-        clearTextBoxes();
+            .SetRawJsonValueAsync(json);*/
+        Debug.Log("Daa");
+       // showAddMenu();
+       // clearTextBoxes();
     }
 
     private void clearTextBoxes() {
@@ -87,6 +112,7 @@ public class ManagmentCategoriesScene : MonoBehaviour
     {
        getData();
        yield return new WaitUntil(() => _dataReceived);
+       Debug.Log(_dataReceived);
        generateCategories();
     }
 
@@ -95,6 +121,7 @@ public class ManagmentCategoriesScene : MonoBehaviour
         _dataReceived = false;
         DatabaseReference newRef = myRef.Child(FirebaseAuth.DefaultInstance.CurrentUser.UserId).Child("categories")
             .Reference;
+   
         newRef.GetValueAsync().ContinueWith(task =>
         {
             if (task.IsFaulted)
@@ -109,12 +136,11 @@ public class ManagmentCategoriesScene : MonoBehaviour
                 {
                     string name = childDataSnapshot.Key;
                     string description = childDataSnapshot.Child("description").Value.ToString();
-                    string color = childDataSnapshot.Child("color").Value.ToString();
+                    string color = childDataSnapshot.Child("colour").Value.ToString();
 
                     string[] values = {name, description, color};
                     valuesCategories.Add(values);
                 }
-
                 _dataReceived = true;
             }
         });
@@ -122,6 +148,7 @@ public class ManagmentCategoriesScene : MonoBehaviour
 
     public void generateCategories() {
         for (int i = 0; i < valuesCategories.Count; i++) {
+            Debug.Log(valuesCategories[i][0]);
             GameObject a = Instantiate(myPrefab); 
             a.transform.SetParent(content.transform, false);
             generateTextCategories(i);

@@ -166,6 +166,7 @@ PlayerSettings:
   applicationIdentifier:
     Android: com.study.dragunova.owlnote
     Standalone: com.study.dragunova.owlnote.app
+    iPhone: com.study.dragunova.owlnote.app
   buildNumber: {}
   AndroidBundleVersionCode: 1
   AndroidMinSdkVersion: 19
