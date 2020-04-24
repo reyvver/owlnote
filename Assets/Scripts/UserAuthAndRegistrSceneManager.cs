@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections.Generic;
+using Boo.Lang.Environments;
 
 public class UserAuthAndRegistrSceneManager : MonoBehaviour
 {
@@ -46,6 +47,12 @@ public class UserAuthAndRegistrSceneManager : MonoBehaviour
             }
         }
   
+    }
+    
+    public void ClosePanel(GameObject obj)
+    {
+        openedPanels.RemoveAt(openedPanels.Count-1);
+        obj.SetActive(false);
     }
     
     public void ShowPanel(GameObject obj)
