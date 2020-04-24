@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Firebase;
 using TMPro;
 using UnityEngine;
 using Firebase.Auth;
@@ -16,7 +17,8 @@ public class UserAuthAndRegistrScript : MonoBehaviour {
   public TMP_InputField emailAuth, emailReg;
   public TMP_InputField passwordAuth, passwordReg, verifyReg;
   public TMP_InputField resetPassword;
-  public TMP_Text errorText;
+  public TMP_Text errorTextReg, errorTextAuth, errorTextReset;
+  public bool successResetPassword = false;
   
   protected string emailA = "", emailR = "";
   protected string passwordA = "", passwordR = "", verifyR;
@@ -76,6 +78,11 @@ public class UserAuthAndRegistrScript : MonoBehaviour {
         emailR = emailReg.text;
         passwordR = passwordReg.text;
         verifyR = verifyReg.text;
+        
+        if (errorTextReset.text !="")
+          errorTextReset.gameObject.SetActive(true);
+        if (successResetPassword)
+          GameObject.Find("SceneManager").GetComponent<UserAuthAndRegistrSceneManager>().ShowPanel(PanelConfrim);
   }
 
   void OnDestroy() {
@@ -315,68 +322,84 @@ public class UserAuthAndRegistrScript : MonoBehaviour {
     string emailAddress = resetPassword.text;
 
     if (emailAddress != "")
-    {   
+    {
       FirebaseAuth.DefaultInstance.SendPasswordResetEmailAsync(emailAddress).ContinueWith(task =>
       {
         if (task.IsCanceled)
         {
-          Debug.LogError("SendPasswordResetEmailAsync was canceled.");
-          return;
+          ErrorTextHandler(errorTextReset, true, "Отменено");
         }
-
         if (task.IsFaulted)
         {
-          Debug.LogError("SendPasswordResetEmailAsync encountered an error: " + task.Exception);
-          return;
+          using (IEnumerator<Exception> enumerator = task.Exception.InnerExceptions.GetEnumerator())
+          {
+            if (enumerator.MoveNext())
+            {
+              FirebaseException error = (FirebaseException)enumerator.Current;
+              errorTextReset.text = error.Message;
+              ErrorTextHandler(errorTextReset, true, error.Message);
+            }
+            else
+            {
+              ErrorTextHandler(errorTextReset, true, "Неопозанная ошибка: "+ task.Exception.Message);
+            }
+          }
         }
-
-        Debug.Log("Password reset email sent successfully.");        
+        else
+        {     
+          successResetPassword = true;
+        }
       });
-      GameObject.Find("SceneManager").GetComponent<UserAuthAndRegistrSceneManager>().ShowPanel(PanelConfrim);
       ClearInputs();
     }
     else
     {
-      GameObject.Find("ErrorMessagePasswordReset").GetComponent<TMP_Text>().text = "Заполните поле";
-      GameObject.Find("ErrorMessagePasswordReset").GetComponent<TMP_Text>().color = Color.red;
+      ErrorTextHandler(errorTextReset, true, "Заполните поле");
     }
-    
   }
-  
+
   private bool CheckInput()
   {
-    if (passwordReg.text !="" &&  verifyReg.text !="" && emailReg.text!="")
+    if (passwordReg.text != "" && verifyReg.text != "" && emailReg.text != "")
     {
       if (passwordReg.text != verifyReg.text)
       {
-        errorText.color = Color.red;
-        errorText.text = "Ошибка: Пароли не совпадают";
+        ErrorTextHandler(errorTextReg, true, "Пароли не совпадают");
         return false;
       }
       else
       {
-        errorText.color = Color.white;
+        ErrorTextHandler(errorTextReg, false, "Ошибок нет");
         return true;
       }
     }
     else
     {
-      errorText.color = Color.red;
-      errorText.text = "Ошибка: Не все поля заполнены";
+      ErrorTextHandler(errorTextReg, true, "Не все поля заполнены");
       return false;
     }
   }
 
-  private void ClearInputs()
+  public void ClearInputs()
   {
-   emailAuth.text  = "";
-   emailReg.text  = "";
-   passwordAuth.text  = "";
-   passwordReg.text  = "";
-   verifyReg.text  = "";
+    emailAuth.text = "";
+    emailReg.text = "";
+    passwordAuth.text = "";
+    passwordReg.text = "";
+    verifyReg.text = "";
     resetPassword.text = "";
+    errorTextAuth.text = "";
+    errorTextReg.text = "";
+    errorTextReset.text = "";
   }
 
-
+  private void ErrorTextHandler(TMP_Text errorText, bool isShown, string str)
+  {
+    if (isShown)
+    {
+      errorText.text = "Ошибка:" + "\n" + str;
+    }
+    errorText.gameObject.SetActive(isShown);
+  }
 
 }

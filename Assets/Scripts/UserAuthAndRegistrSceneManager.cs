@@ -46,22 +46,28 @@ public class UserAuthAndRegistrSceneManager : MonoBehaviour
   
             }
         }
-  
     }
     
+    public void CloseAll()
+    {
+        for (int i = 0; i < openedPanels.Count; i++)
+        {
+            openedPanels[i].SetActive(false);
+        }
+        openedPanels.Clear();
+        GameObject.Find("SceneManager").GetComponent<UserAuthAndRegistrScript>().successResetPassword = false;
+        GameObject.Find("SceneManager").GetComponent<UserAuthAndRegistrScript>().ClearInputs();
+    }
     public void ClosePanel(GameObject obj)
     {
         openedPanels.RemoveAt(openedPanels.Count-1);
         obj.SetActive(false);
     }
-    
     public void ShowPanel(GameObject obj)
     {
         openedPanels.Add(obj);
         obj.SetActive(true);
     }
-    
-    
     public void ShowScene(GameObject obj)
     {
         obj.transform.SetAsLastSibling();
