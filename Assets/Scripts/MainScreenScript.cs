@@ -27,13 +27,24 @@ public class MainScreenScript : MonoBehaviour
     {
     }
 
+    public void ReCheckEmailVerified()
+    {
+        currentUser.ReloadAsync();
+        if (currentUser.IsEmailVerified )
+        {
+            Debug.Log("подтвержден");
+            panelVerify.SetActive(false);
+        }
+        else       Debug.Log("ne подтвержден");
+    }
+
     IEnumerator CheckUserEmail()
     {
         ReloadUser();
         yield return new WaitUntil(() => _chk_email);
         if (currentUser.UserId != "AVATC0nCWxd1l3saRQhbdoTFjVI3")
         {
-            currentUser.ReloadAsync();
+            //currentUser.ReloadAsync();
             if (currentUser.IsEmailVerified == false)
             {
                 panelVerify.SetActive(true);

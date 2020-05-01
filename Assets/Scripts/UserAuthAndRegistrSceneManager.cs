@@ -1,7 +1,6 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections.Generic;
-using Boo.Lang.Environments;
 
 public class UserAuthAndRegistrSceneManager : MonoBehaviour
 {
@@ -55,8 +54,7 @@ public class UserAuthAndRegistrSceneManager : MonoBehaviour
             openedPanels[i].SetActive(false);
         }
         openedPanels.Clear();
-        GameObject.Find("SceneManager").GetComponent<UserAuthAndRegistrScript>().successResetPassword = false;
-        GameObject.Find("SceneManager").GetComponent<UserAuthAndRegistrScript>().ClearInputs();
+        GameObject.Find("SceneManager").GetComponent<UserAuthAndRegistryScript>().ClearInputs();
     }
     public void ClosePanel(GameObject obj)
     {
