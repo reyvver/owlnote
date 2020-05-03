@@ -17,6 +17,10 @@ public class UserAuthAndRegistryScript : MonoBehaviour
   public TMP_InputField passwordAuth, passwordReg, verifyReg;
   public TMP_InputField resetPassword;
   public TMP_Text errorTextReg, errorTextAuth, errorTextReset;
+  
+  public GameObject objSceneManager;
+  private UserAuthAndRegistrSceneManager scriptSceneManager;
+  private bool _resetPasswrod;
 
   protected string emailA = "", emailR = "";
   protected string passwordA = "", passwordR = "", verifyR;
@@ -24,8 +28,9 @@ public class UserAuthAndRegistryScript : MonoBehaviour
   
   DependencyStatus _dependencyStatus = DependencyStatus.UnavailableOther;
   
-  void Start() {
-    
+  void Start()
+  {
+    scriptSceneManager = objSceneManager.GetComponent<UserAuthAndRegistrSceneManager>();
     FirebaseAuth.DefaultInstance.StateChanged += HandleAuthStateChanged;
     CheckUser();
     
@@ -63,7 +68,13 @@ public class UserAuthAndRegistryScript : MonoBehaviour
         break;
       }
     }
-    
+
+    if (_resetPasswrod)
+    {
+      scriptSceneManager.ShowPanel(panelConfirm);
+      _resetPasswrod = false;
+    }
+
     emailA = emailAuth.text;
     passwordA = passwordAuth.text;
         
@@ -126,12 +137,10 @@ public class UserAuthAndRegistryScript : MonoBehaviour
     }
   }
 
-
- 
   
   
   
-  
+  //Авторзация
   public void SigninAsync() 
   {
     _errorOperation = "Sign-in";
@@ -156,6 +165,8 @@ public class UserAuthAndRegistryScript : MonoBehaviour
   
   
   
+  
+  //Регистрация
   public void CreateUserAsync()
   {
     _errorOperation = "User-Creation";
@@ -200,6 +211,7 @@ public class UserAuthAndRegistryScript : MonoBehaviour
 
 
 
+  //Сброс пароля на почту
   public void ResetPassword()
   {
     _errorOperation = "Password-Reset";
@@ -208,8 +220,7 @@ public class UserAuthAndRegistryScript : MonoBehaviour
 
     if (emailAddress != "")
     {
-      FirebaseAuth.DefaultInstance.SendPasswordResetEmailAsync(emailAddress).ContinueWith(HandlePasswordReset).Unwrap();
-      ClearInputs();
+      FirebaseAuth.DefaultInstance.SendPasswordResetEmailAsync(emailAddress).ContinueWith(HandlePasswordReset);
     }
     else
     {
@@ -219,14 +230,15 @@ public class UserAuthAndRegistryScript : MonoBehaviour
   private Task HandlePasswordReset(Task passTask)
   {
     if (LogTaskCompletion(passTask))
-    { 
-      GameObject.Find("SceneManager").GetComponent<UserAuthAndRegistrSceneManager>().ShowPanel(panelConfirm);
+    {
+      _resetPasswrod = true;
+      ClearInputs();
     }
     return Task.FromResult(0);
   }
 
 
-
+  //Другое
   private bool LogTaskCompletion(Task task) {
     var complete = false;
     if (task.IsCanceled) {
@@ -263,13 +275,12 @@ public class UserAuthAndRegistryScript : MonoBehaviour
     passwordReg.text = "";
     verifyReg.text = "";
     resetPassword.text = "";
+
+    _errorMessage = "";
+    _errorOperation = "";
     errorTextAuth.text = "";
     errorTextReg.text = "";
     errorTextReset.text = "";
   }
-
-
-  public void GoogleSignIn()
-  {
-  }
+  
 }

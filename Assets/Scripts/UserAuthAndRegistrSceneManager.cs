@@ -4,19 +4,22 @@ using System.Collections.Generic;
 
 public class UserAuthAndRegistrSceneManager : MonoBehaviour
 {
-    public GameObject  PanelConfrim;
+    public GameObject objSceneManager, WelcomeScene, RegistrationScene,  PanelConfrim;
     private GameObject currentGameObject;
+    private UserAuthAndRegistryScript scriptManagment;
     public List<GameObject> openedPanels;
     private bool _visibility, _support;
 
     private void Start()
     {
-        GameObject.Find("WelcomeScene").transform.SetAsLastSibling();
+        WelcomeScene.transform.SetAsLastSibling();
+        scriptManagment = objSceneManager.GetComponent<UserAuthAndRegistryScript>();
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape)) {
+            
             if (openedPanels.Count > 0)
             {
                 if (openedPanels[openedPanels.Count - 1] == PanelConfrim)
@@ -25,7 +28,7 @@ public class UserAuthAndRegistrSceneManager : MonoBehaviour
                     {
                         openedPanels[i].SetActive(false);
                     }
-                    openedPanels.Clear();
+          
                 }
                 else
                 {
@@ -33,17 +36,22 @@ public class UserAuthAndRegistrSceneManager : MonoBehaviour
                     openedPanels.RemoveAt(openedPanels.Count - 1);
                 }
             }
-            else
-            {
+            else {
+
                 try
                 {
-                    GameObject.Find("RegistrationScene").transform.SetAsFirstSibling();
+                    RegistrationScene.transform.SetAsFirstSibling();
                 }
                 catch (Exception e)
                 {
                 }
   
             }
+        }
+
+        if (openedPanels.Count == 0)
+        {
+            scriptManagment.ClearInputs();
         }
     }
     
@@ -54,7 +62,7 @@ public class UserAuthAndRegistrSceneManager : MonoBehaviour
             openedPanels[i].SetActive(false);
         }
         openedPanels.Clear();
-        GameObject.Find("SceneManager").GetComponent<UserAuthAndRegistryScript>().ClearInputs();
+        scriptManagment.ClearInputs();
     }
     public void ClosePanel(GameObject obj)
     {
