@@ -7,38 +7,78 @@ using TMPro;
 
 public class MainScreenSceneManager : MonoBehaviour
 {
+    public GameObject FirstScene, objSceneManager;
+    private MainScreenScript MainScreenScript;
+    private LogOut LogOutScript;
+    public GameObject TodayPlate, NumberPanel;
+
+
     private List<int> NumberOfDaysInMonths = new List<int>();
     private List<GameObject> NumberPlates = new List<GameObject>();
     private List<GameObject> NumberDays = new List<GameObject>();
+    public GameObject AddPanel, ButtonAdd;
     public TextMeshProUGUI tCurrentDay, tMonth, tDayOfWeek;
     public GameObject panelSuccess;
 
     public List<GameObject> openedPanels;
+    private bool _visibility;
+    public bool  _importantOperation;
 
     // Start is called before the first frame update
     void Start()
     {
-        GameObject.Find("MainScene").transform.SetAsLastSibling();
+        MainScreenScript = objSceneManager.GetComponent<MainScreenScript>();
+        LogOutScript = objSceneManager.GetComponent<LogOut>();
+        FirstScene.transform.SetAsLastSibling();
         InitializeDays();
         GetDates();
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (!Input.GetKeyDown(KeyCode.Escape)) return;
+
+        if (openedPanels.Count > 0)
         {
-            if (openedPanels.Count > 0)
+            if (openedPanels[openedPanels.Count - 1] == panelSuccess)
             {
-                if (openedPanels[openedPanels.Count - 1] == panelSuccess)
+                if (_importantOperation) LogOutScript.LogOutUser();
+                else
                 {
-                    GameObject.Find("SceneManager").GetComponent<LogOut>().LogOutUser();
+                    _visibility = true;
+                    CloseAll();
                 }
+            }
+            else
+            {
                 openedPanels[openedPanels.Count - 1].SetActive(false);
                 openedPanels.RemoveAt(openedPanels.Count - 1);
             }
         }
 
+        if (openedPanels.Count == 0 && _visibility)
+        {
+            _visibility = !_visibility;
+            ButtonAdd.transform.Rotate(0, 0, 45);
+        }
+        
     }
+    
+    public void CloseAll()
+    {
+        for (int i = 0; i < openedPanels.Count; i++)
+        {
+            openedPanels[i].SetActive(false);
+        }
+        openedPanels.Clear();
+
+        if (_visibility)
+        {
+            ButtonAdd.transform.Rotate(0, 0, 45);
+            _visibility = !_visibility;
+        }
+    }
+    
     /*Выводит всю информацию о месяце, датах и тд в текстовые инпуты, которые есть на сцене*/
     public void GetDates()
     {
@@ -60,9 +100,9 @@ public class MainScreenSceneManager : MonoBehaviour
         int currentDay = Convert.ToInt32(tCurrentDay.text);
         int currentMonth = DateTime.Today.Month;
         
-        GameObject.Find("NumberPlate0").transform.Find("BackPanel").GetComponent<Image>().color = new Color32(144, 96, 255, 255);
-        GameObject.Find("NumberPlate0").transform.Find("Number").GetComponent<TextMeshProUGUI>().color = new Color32(255,255,255,255);
-        GameObject.Find("NumberPlate0").transform.Find("Text").GetComponent<TextMeshProUGUI>().color = new Color32(255,255,255,255);
+        TodayPlate.transform.Find("BackPanel").GetComponent<Image>().color = new Color32(144, 96, 255, 255);
+        TodayPlate.transform.Find("Number").GetComponent<TextMeshProUGUI>().color = Color.white;
+        TodayPlate.transform.Find("Text").GetComponent<TextMeshProUGUI>().color =  Color.white;
         
         for (int i = 0; i < NumberPlates.Count; i++)
         {
@@ -84,8 +124,7 @@ public class MainScreenSceneManager : MonoBehaviour
     private void InitializeDatesPanels()
     {
         int i = 1;
-        GameObject panel = GameObject.Find("NumberPanel");
-        foreach (Transform obj in  panel.transform)
+        foreach (Transform obj in  NumberPanel.transform)
         {
             GameObject plate = obj.Find("Number").gameObject;
             NumberPlates.Add(plate.gameObject);
@@ -128,10 +167,24 @@ public class MainScreenSceneManager : MonoBehaviour
 
     public void ShowPanel(GameObject obj)
     {
-        GameObject.Find("SceneManager").GetComponent<MainScreenScript>().ClearText();
+        MainScreenScript.ClearText();
         openedPanels.Add(obj);
         obj.SetActive(true);
     }
+
+    public void showAddMenu() {
+        _visibility = !_visibility;
+        AddPanel.SetActive(_visibility);
+        openedPanels.Add(AddPanel);
+
+        if (_visibility) {
+            ButtonAdd.transform.Rotate(0, 0, -45);
+        }
+        else {
+            ButtonAdd.transform.Rotate(0, 0, 45);
+        }
+    }
+    
 
     public void ShowScene(GameObject obj)
     {
@@ -140,7 +193,6 @@ public class MainScreenSceneManager : MonoBehaviour
 
     public void ClosePanel(GameObject obj)
     {
-       // blurPanel.SetActive(false);
         obj.SetActive(false);
     }
 }
