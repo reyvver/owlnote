@@ -12,6 +12,7 @@ public class MainScreenSceneManager : MonoBehaviour
     private LogOut LogOutScript;
     public GameObject TodayPlate, NumberPanel;
 
+
     private List<int> NumberOfDaysInMonths = new List<int>();
     private List<GameObject> NumberPlates = new List<GameObject>();
     private List<GameObject> NumberDays = new List<GameObject>();
@@ -21,6 +22,7 @@ public class MainScreenSceneManager : MonoBehaviour
 
     public List<GameObject> openedPanels;
     private bool _visibility;
+    public bool  _importantOperation;
 
     // Start is called before the first frame update
     void Start()
@@ -40,13 +42,21 @@ public class MainScreenSceneManager : MonoBehaviour
         {
             if (openedPanels[openedPanels.Count - 1] == panelSuccess)
             {
-                LogOutScript.LogOutUser();
+                if (_importantOperation) LogOutScript.LogOutUser();
+                else
+                {
+                    _visibility = true;
+                    CloseAll();
+                }
             }
-            openedPanels[openedPanels.Count - 1].SetActive(false);
-            openedPanels.RemoveAt(openedPanels.Count - 1);
+            else
+            {
+                openedPanels[openedPanels.Count - 1].SetActive(false);
+                openedPanels.RemoveAt(openedPanels.Count - 1);
+            }
         }
 
-        if (openedPanels.Count == 0)
+        if (openedPanels.Count == 0 && _visibility)
         {
             _visibility = !_visibility;
             ButtonAdd.transform.Rotate(0, 0, 45);
@@ -174,7 +184,7 @@ public class MainScreenSceneManager : MonoBehaviour
             ButtonAdd.transform.Rotate(0, 0, 45);
         }
     }
-
+    
 
     public void ShowScene(GameObject obj)
     {

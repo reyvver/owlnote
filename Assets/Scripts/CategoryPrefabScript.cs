@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿
 using UnityEngine;
 using TMPro;
-using UnityEditorInternal;
-using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 
 public class CategoryPrefabScript : MonoBehaviour
 {
     private MainScreenCategories script;
-    public TMP_Text name;
+    public TMP_Text name, count;
+
     // Start is called before the first frame update
 
     private void Start()
@@ -21,6 +19,7 @@ public class CategoryPrefabScript : MonoBehaviour
     public void OnClickCategory(string operation)
     {
         script.choosenCategory = name.text;
+        script.categoryCount = count.text;
 
         if (operation == "delete")
             script._delete = true;

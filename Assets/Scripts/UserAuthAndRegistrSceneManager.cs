@@ -47,12 +47,14 @@ public class UserAuthAndRegistrSceneManager : MonoBehaviour
                 }
   
             }
+            
+            if (openedPanels.Count == 0)
+            {
+                scriptManagment.ClearInputs();
+            }
         }
 
-        if (openedPanels.Count == 0)
-        {
-            scriptManagment.ClearInputs();
-        }
+    
     }
     
     public void CloseAll()

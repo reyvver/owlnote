@@ -7,11 +7,13 @@ using TMPro;
 public class ScrollRectScript : MonoBehaviour
 {
     public TMP_Text textResult;
+    public string hours, minutes;
     public GameObject scrollerHour, scrollerMinutes;
     void Update()
-    {
-        string hours = scrollerHour.GetComponent<UIVerticalScroller>().result;
-        string minutes = scrollerMinutes.GetComponent<UIVerticalScroller>().result;
+    { 
+        hours = scrollerHour.GetComponent<UIVerticalScroller>().result;
+        minutes = scrollerMinutes.GetComponent<UIVerticalScroller>().result;
         textResult.text =  hours +  " ч " + minutes+ " мин";
     }
+
 }

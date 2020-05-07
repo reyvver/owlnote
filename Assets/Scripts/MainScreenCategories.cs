@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using Firebase;
 using Firebase.Auth;
@@ -13,27 +12,23 @@ public class MainScreenCategories : MonoBehaviour
 {
 
     public GameObject AddNewCategoryPanel, ConfirmDeleting;
-    public GameObject ButtonAdd;
     public GameObject myPrefab;
     public Transform content;
     public TextMeshProUGUI name, textConfirmDelete;
     public Text colour;
-    public string choosenCategory = "";
+    public string choosenCategory = "", categoryCount;
     public bool _delete;
     
     private bool _dataReceived;
 
     private List<string[]> valuesCategories = new List<string[]>();
-    private DatabaseReference myRef;
+    private DatabaseReference  categoriesRef;
+    private FirebaseUser currentUser;
 
     public class categoryClass
     {
-        public int count;
-        public string colour;
-
-        public categoryClass()
-        {
-        }
+       public int count;
+       public string colour;
 
         public categoryClass(int count, string colour)
         {
@@ -44,115 +39,83 @@ public class MainScreenCategories : MonoBehaviour
 
     void Start()
     {
-       // InitializeDatabase();
-    // StartCoroutine(viewCategories());
+        InitializeDatabase();
     }
 
-    void Update()
+    private void Update()
     {
-        if (_delete)
+        if(_delete)
         {
             textConfirmDelete.text = choosenCategory;
             ConfirmDeleting.gameObject.SetActive(true);
         }
     }
 
-    public void CloseConfirmPanel()
-    {
-        _delete = false;
-        ConfirmDeleting.gameObject.SetActive(false);
-    }
-
     private void InitializeDatabase()
     {
         FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://owlnote-dragunovatv.firebaseio.com/");
-        myRef = FirebaseDatabase.DefaultInstance.RootReference;
+
+        currentUser = FirebaseAuth.DefaultInstance.CurrentUser;
+
+        categoriesRef = FirebaseDatabase.DefaultInstance.GetReference(currentUser.UserId + "/categories");
+      
+        categoriesRef.ValueChanged += HandleValueChanged;
     }
-
-
-    public void DatabaseOperations(string operation)
+    
+    private void OnDestroy()
     {
-        switch (operation)
+        categoriesRef.ValueChanged -= HandleValueChanged;
+    }
+    
+   void HandleValueChanged(object sender, ValueChangedEventArgs args)
+    {
+        if (args.DatabaseError != null)
         {
-            case "adding":
-            {
-                AddNewCategory();
-                break;
-            }
-            case "deleting":
-            {
-                DeleteCategory();
-                break;
-            }
+            Debug.LogError(args.DatabaseError.Message);
+            return;
         }
-    }
+        
+        Debug.Log("handle value changed");
 
-    private void AddNewCategory()
-    {
-        categoryClass newObject = new categoryClass(0, colour.text);
-        string json = JsonUtility.ToJson(newObject);
-        myRef.Child(FirebaseAuth.DefaultInstance.CurrentUser.UserId).Child("categories").Child(name.text)
-            .SetRawJsonValueAsync(json);
-        ClearTextBoxes();
         ClearContent();
-        AddNewCategoryPanel.SetActive(false);
-        StartCoroutine(viewCategories());
-    }
+        
+        DataSnapshot snapshot = args.Snapshot;
 
-    private void ClearTextBoxes()
-    {
-        name.text = "";
-        colour.text = "#000000";
-    }
-
-    private void ClearContent()
-    {
-        foreach (Transform child in content.transform)
+        foreach (DataSnapshot childDataSnapshot in snapshot.Children)
         {
-            Destroy(child.gameObject);
-            valuesCategories.Clear();
+            string name = childDataSnapshot.Key;
+            if (name != "calendar")
+            {
+                string count = childDataSnapshot.Child("count").Value.ToString();
+                string color = childDataSnapshot.Child("colour").Value.ToString();
+
+                string[] values = {name, count, color};
+                valuesCategories.Add(values);
+            }
         }
-    }
 
-    IEnumerator viewCategories()
-    {
-        getData();
-        yield return new WaitUntil(() => _dataReceived);
         generateCategories();
-    }
 
-    private void getData()
+        
+    }
+   
+   public void AddNewCategory()
+   {
+       categoryClass newObject = new categoryClass(0, colour.text);
+       string json = JsonUtility.ToJson(newObject);
+       categoriesRef.Child(name.text).SetRawJsonValueAsync(json);
+       ClearTextBoxes();
+       AddNewCategoryPanel.SetActive(false);
+  }
+
+   public void DeleteCategory()
     {
-        _dataReceived = false;
-        DatabaseReference newRef = myRef.Child(FirebaseAuth.DefaultInstance.CurrentUser.UserId).Child("categories")
-            .Reference;
-
-        newRef.GetValueAsync().ContinueWith(task =>
-        {
-            if (task.IsFaulted)
-            {
-                Debug.Log("error occured");
-            }
-            else if (task.IsCompleted)
-            {
-                DataSnapshot snapshot = task.Result;
-                Debug.Log(snapshot.ChildrenCount);
-                foreach (DataSnapshot childDataSnapshot in snapshot.Children)
-                {
-                    string name = childDataSnapshot.Key;
-                    string count = childDataSnapshot.Child("count").Value.ToString();
-                    string color = childDataSnapshot.Child("colour").Value.ToString();
-
-                    string[] values = {name, count, color};
-                    valuesCategories.Add(values);
-                }
-
-                _dataReceived = true;
-            }
-        });
+        categoriesRef.Child(choosenCategory).RemoveValueAsync();
+        _delete = false;
+        ConfirmDeleting.gameObject.SetActive(false);
     }
-
-    public void generateCategories()
+   
+    private void generateCategories()
     {
         for (int i = 0; i < valuesCategories.Count; i++)
         {
@@ -179,15 +142,27 @@ public class MainScreenCategories : MonoBehaviour
             colorO.GetComponent<Image>().color = newCol;
         }
     }
-
-    private void DeleteCategory()
+    
+    
+    public void CloseConfirmPanel()
     {
-        myRef.Child(FirebaseAuth.DefaultInstance.CurrentUser.UserId).Child("categories").Child(choosenCategory)
-            .RemoveValueAsync();
-        ClearContent();
-        StartCoroutine(viewCategories());
         _delete = false;
         ConfirmDeleting.gameObject.SetActive(false);
+    }
+
+    private void ClearTextBoxes()
+    {
+        name.text = "";
+        colour.text = "#000000";
+    }
+
+    private void ClearContent()
+    {
+        foreach (Transform child in content.transform)
+        {
+            Destroy(child.gameObject);
+            valuesCategories.Clear();
+        }
     }
 
 }

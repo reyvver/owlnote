@@ -12,7 +12,6 @@ public class MainScreenScript : MonoBehaviour
     public GameObject objSceneManager;
     private MainScreenSceneManager scriptSceneManager;
 
-
     public TextMeshProUGUI verifyEmail, errorLabelResetPassword, errorLabelDeleteAccount;
     public TextMeshProUGUI messageSuccess;
     public GameObject panelSuccess, panelVerify;
@@ -34,6 +33,7 @@ public class MainScreenScript : MonoBehaviour
         {
             messageSuccess.text = "Ваш аккаунт ("+email+ ") был удален.";
             scriptSceneManager.ShowPanel(panelSuccess);
+            scriptSceneManager._importantOperation = true;
             _reauthenticate = false;
             _userDeleted = false;
         }
@@ -43,6 +43,7 @@ public class MainScreenScript : MonoBehaviour
             errorLabelResetPassword.color = Color.white;
             messageSuccess.text = "Ваш пароль обновлен. Пожалуйста, перезайдите";
             scriptSceneManager.ShowPanel(panelSuccess);
+            scriptSceneManager._importantOperation = true;
             _reauthenticate = false;
             _passwordReset = false;
         }
