@@ -1,18 +1,17 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using System;
 using System.Globalization;
 using TMPro;
-using UnityEngine.Rendering;
 
 public class CalendarScene : MonoBehaviour
 {
-//    public TextMeshProUGUI tMonth, tDayOfWeek;
-    //  private List<int> NumberOfDaysInMonths = new List<int>();
+
     public TextMeshProUGUI monthText, nextText, previousText, currentYearText;
     private int[] daysPerMonth = new[] {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     public int currentYear, currentMonth;
+    
+    private CultureInfo localCultureInfo = new CultureInfo("ru-RU");
 
     void Start()
     {
@@ -21,17 +20,18 @@ public class CalendarScene : MonoBehaviour
         CheckTypeOfYear();
         FillCalendar();
         UpdateMonthTimeline();
+
     }
 
     private void FillCalendar()
     {
-
         //Определяется день недели первого дня в месяце
         int firstDayOfWeek = (int) new DateTime(currentYear, currentMonth, 1).DayOfWeek;
         int currentDay = 1; //Номер дня (Будет менятся от 1 до 30 или 31)
         bool chk = false; //Переменная для проверки полной заполненности месяца
         if (firstDayOfWeek == 0) firstDayOfWeek = 7;
         if (firstDayOfWeek == 6) firstDayOfWeek = 1;
+        
         //Для первой недели:
         GameObject firstWeek = GameObject.Find("Week1");
         for (int i = firstDayOfWeek; i <= 7; i++)
@@ -122,12 +122,13 @@ public class CalendarScene : MonoBehaviour
         currentYearText.text = currentYear.ToString();
         monthText.text = MonthName(currentMonth);
         nextText.text = MonthName(next);
-        previousText.text =MonthName(previous);
+        previousText.text = MonthName(previous);
     }
 
     private string MonthName(int index)
     {
-        return CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(index);
+        string str = localCultureInfo.DateTimeFormat.GetMonthName(index);
+        return ToTitleCase(str);
     }
 
     private void ClearAll()
@@ -146,5 +147,9 @@ public class CalendarScene : MonoBehaviour
                 numberText.color = Color.black;
             }
         }
+    }
+    public string ToTitleCase(string str)
+    {
+        return localCultureInfo.TextInfo.ToTitleCase(str.ToLower());
     }
 }

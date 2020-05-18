@@ -20,6 +20,8 @@ public class MainScreenSceneManager : MonoBehaviour
     public TextMeshProUGUI tCurrentDay, tMonth, tDayOfWeek;
     public GameObject panelSuccess;
 
+    private CultureInfo localCultureInfo = new CultureInfo("ru-RU");
+    
     public List<GameObject> openedPanels;
     private bool _visibility;
     public bool  _importantOperation;
@@ -83,8 +85,8 @@ public class MainScreenSceneManager : MonoBehaviour
     public void GetDates()
     {
         string day = DateTime.Today.Day.ToString();
-        string day_of_week = CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(DateTime.Today.DayOfWeek);
-        string month  = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(DateTime.Today.Month);
+        string day_of_week =localCultureInfo.DateTimeFormat.GetDayName(DateTime.Today.DayOfWeek);
+        string month  = localCultureInfo.DateTimeFormat.GetMonthName(DateTime.Today.Month);
             
         tMonth.text = ToTitleCase(month);
         tDayOfWeek.text = ToTitleCase(day_of_week);
@@ -113,7 +115,7 @@ public class MainScreenSceneManager : MonoBehaviour
         }
 
         DateTime currentDayName =  DateTime.Today;
-        DateTimeFormatInfo dtfi = CultureInfo.CurrentCulture.DateTimeFormat;
+        DateTimeFormatInfo dtfi = localCultureInfo.DateTimeFormat;
         for (int i = 0; i < NumberDays.Count; i++)
         {
             NumberDays[i].GetComponent<TextMeshProUGUI>().text = Convert.ToString(dtfi.GetShortestDayName(currentDayName.DayOfWeek));
@@ -162,7 +164,7 @@ public class MainScreenSceneManager : MonoBehaviour
     /*Процедура, возвращающая слово с заглавной буквы*/
     public string ToTitleCase(string str)
     {
-        return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(str.ToLower());
+        return localCultureInfo.TextInfo.ToTitleCase(str.ToLower());
     }
 
     public void ShowPanel(GameObject obj)
@@ -192,6 +194,16 @@ public class MainScreenSceneManager : MonoBehaviour
     }
 
     public void ClosePanel(GameObject obj)
+    {
+        obj.SetActive(false);
+    }
+
+    public void OpenCurrentDay(GameObject obj)
+    {
+        obj.SetActive(true);
+    }
+
+    public void OpenCalendarPage(GameObject obj)
     {
         obj.SetActive(false);
     }

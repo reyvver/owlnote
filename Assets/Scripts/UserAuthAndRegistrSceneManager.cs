@@ -37,15 +37,8 @@ public class UserAuthAndRegistrSceneManager : MonoBehaviour
                 }
             }
             else {
+                RegistrationScene.transform.SetAsFirstSibling();
 
-                try
-                {
-                    RegistrationScene.transform.SetAsFirstSibling();
-                }
-                catch (Exception e)
-                {
-                }
-  
             }
             
             if (openedPanels.Count == 0)

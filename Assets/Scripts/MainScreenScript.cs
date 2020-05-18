@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Threading.Tasks;
 using Firebase;
 using UnityEngine;
 using Firebase.Auth;
+using Firebase.Database;
 using UnityEngine.SceneManagement;
 using TMPro;
 
@@ -12,16 +12,21 @@ public class MainScreenScript : MonoBehaviour
     public GameObject objSceneManager;
     private MainScreenSceneManager scriptSceneManager;
 
-    public TextMeshProUGUI verifyEmail, errorLabelResetPassword, errorLabelDeleteAccount;
-    public TextMeshProUGUI messageSuccess;
-    public GameObject panelSuccess, panelVerify;
+    public TextMeshProUGUI verifyEmail, errorLabelResetPassword, errorLabelDeleteAccount, newIventDate;
+    public TextMeshProUGUI messageSuccess, textConfirmDelete;
+    public GameObject panelSuccess, panelVerify,ConfirmDeleting;
     public TMP_InputField passwordCurrent, passwordNew, verifyNew, verifyToDelete;
     private bool _chkEmail, _reauthenticate, _passwordReset, _userDeleted;
     private string _errorMessage, operation,email;
     private FirebaseUser currentUser;
 
+
+    public string typeDelete, chosenTime, chosenTitle, chosenCategory, categoryColour;
+
     void Start()
     {
+        chosenCategory = "По умолчанию";
+        chosenCategory = "#9792F7";
         scriptSceneManager = objSceneManager.GetComponent<MainScreenSceneManager>();
         currentUser = FirebaseAuth.DefaultInstance.CurrentUser;
         ReloadUser();
@@ -63,7 +68,6 @@ public class MainScreenScript : MonoBehaviour
             _chkEmail = false;
         }
 
-        //ошибка
         switch (operation)
         {
             case "delete":
@@ -122,7 +126,7 @@ public class MainScreenScript : MonoBehaviour
         if (LogTaskCompletion(userTask))
         {
             _reauthenticate = true;
-            Debug.Log("User reauthenticated successfully.");
+            //Debug.Log("User reauthenticated successfully.");
             if (operation == "delete")
             {
                 DeleteUser();
@@ -193,7 +197,7 @@ public class MainScreenScript : MonoBehaviour
     }
     private void DeleteUser()
     {
-        Debug.Log("удаляем");
+        //Debug.Log("удаляем");
         FirebaseUser user = FirebaseAuth.DefaultInstance.CurrentUser;
         email = user.Email;
         user?.DeleteAsync().ContinueWith(HandleDeletingUser);
@@ -225,7 +229,7 @@ public class MainScreenScript : MonoBehaviour
     {
         if (LogTaskCompletion(userTask))
         {
-            Debug.Log("повторное сообщение отправлено");
+           // .Log("повторное сообщение отправлено");
         }
     }
     
@@ -246,11 +250,11 @@ public class MainScreenScript : MonoBehaviour
     private bool LogTaskCompletion(Task task) {
         var complete = false;
         if (task.IsCanceled) {
-            Debug.Log("canceled");
+            //Debug.Log("canceled");
         }
         else if (task.IsFaulted)
         {
-            Debug.Log("error");
+           // Debug.Log("error");
             if (task.Exception != null)
                 foreach (Exception exception in task.Exception.Flatten().InnerExceptions)
                 {
@@ -262,17 +266,72 @@ public class MainScreenScript : MonoBehaviour
                     }
 
                     _errorMessage = exception.Message;
-                    Debug.Log(authErrorCode + exception);
+                   // Debug.Log(authErrorCode + exception);
                 }
         }
         else if (task.IsCompleted) {
-            Debug.Log( " completed");
+           // Debug.Log( " completed");
             complete = true;
         }
         return complete;
     }
 
 
+    public void ShowConfirmDelete()
+    {
+        ConfirmDeleting.gameObject.SetActive(true);
+        ConfirmDeleting.transform.SetAsLastSibling();
+        switch (typeDelete)
+        {
+            case "event":
+            {   
+            //   Debug.Log(newIventDate.text + "  "+ chosenTime);
+                textConfirmDelete.text = "пункт расписания " + "'"+ chosenTitle+ "'";
+                break;
+            }
+            case "category":
+            {
+                textConfirmDelete.text = "категорию " + "'" + chosenCategory+ "'";
+                break;
+            }
+        }
+        
+    }
+    
 
+    public void DeleteInf()
+    {
+        switch (typeDelete)
+        {
+            case "event":
+            {
+                string date = ReplaceWith(newIventDate.text, false);
+                DatabaseReference  calendarRef =  FirebaseDatabase.DefaultInstance.GetReference( "/calendar/"+ currentUser.UserId+"/"+date);
+                calendarRef.Child(chosenTime).RemoveValueAsync();
+            
+                break;
+            }
+            case "category":
+            {
+               DatabaseReference categoriesRef = FirebaseDatabase.DefaultInstance.GetReference("/categories/" + currentUser.UserId);
+                categoriesRef.Child(chosenCategory).RemoveValueAsync();
+                break;
+            }
+        }
+        
+        ConfirmDeleting.gameObject.SetActive(false);
+        ConfirmDeleting.transform.SetAsFirstSibling();
+        
+    }
+    
+    private string ReplaceWith(string str, bool chk)
+    {
+        string result = "";
+        if (chk)
+            result = str.Replace(@"\",".");
+        else    result = str.Replace(".",@"\");
+        return result;
+    
+    }
 
 }

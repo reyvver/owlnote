@@ -11,24 +11,22 @@ using TMPro;
 public class MainScreenCategories : MonoBehaviour
 {
 
-    public GameObject AddNewCategoryPanel, ConfirmDeleting;
+    public GameObject AddNewCategoryPanel;
     public GameObject myPrefab;
     public Transform content;
-    public TextMeshProUGUI name, textConfirmDelete;
+    public TextMeshProUGUI nameCategory;
     public Text colour;
-    public string choosenCategory = "", categoryCount;
-    public bool _delete;
-    
+
     private bool _dataReceived;
 
     private List<string[]> valuesCategories = new List<string[]>();
-    private DatabaseReference  categoriesRef;
+    private DatabaseReference categoriesRef;
     private FirebaseUser currentUser;
 
     public class categoryClass
     {
-       public int count;
-       public string colour;
+        public int count;
+        public string colour;
 
         public categoryClass(int count, string colour)
         {
@@ -42,86 +40,90 @@ public class MainScreenCategories : MonoBehaviour
         InitializeDatabase();
     }
 
-    private void Update()
-    {
-        if(_delete)
-        {
-            textConfirmDelete.text = choosenCategory;
-            ConfirmDeleting.gameObject.SetActive(true);
-        }
-    }
-
     private void InitializeDatabase()
     {
         FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://owlnote-dragunovatv.firebaseio.com/");
 
         currentUser = FirebaseAuth.DefaultInstance.CurrentUser;
+        
+        categoriesRef = FirebaseDatabase.DefaultInstance.GetReference("/categories/" + currentUser.UserId);
 
-        categoriesRef = FirebaseDatabase.DefaultInstance.GetReference(currentUser.UserId + "/categories");
-      
         categoriesRef.ValueChanged += HandleValueChanged;
     }
-    
+
     private void OnDestroy()
     {
         categoriesRef.ValueChanged -= HandleValueChanged;
     }
-    
-   void HandleValueChanged(object sender, ValueChangedEventArgs args)
+
+    private void HandleValueChanged(object sender, ValueChangedEventArgs args)
     {
         if (args.DatabaseError != null)
         {
-            Debug.LogError(args.DatabaseError.Message);
+           // Debug.LogError(args.DatabaseError.Message);
             return;
         }
-        
-        Debug.Log("handle value changed");
-
+        //Debug.Log("handle value changed : category");
         ClearContent();
-        
+
         DataSnapshot snapshot = args.Snapshot;
 
-        foreach (DataSnapshot childDataSnapshot in snapshot.Children)
+        if (snapshot.ChildrenCount == 0)
+            AddDefaultCategory();
+        else
         {
-            string name = childDataSnapshot.Key;
-            if (name != "calendar")
+            foreach (DataSnapshot childDataSnapshot in snapshot.Children)
             {
-                string count = childDataSnapshot.Child("count").Value.ToString();
-                string color = childDataSnapshot.Child("colour").Value.ToString();
+                string name = childDataSnapshot.Key;
+                string color = (string) childDataSnapshot.GetValue(true);
 
-                string[] values = {name, count, color};
+                string[] values = {name, color};
+
                 valuesCategories.Add(values);
             }
+
+            GenerateCategories();
         }
 
-        generateCategories();
-
-        
     }
-   
-   public void AddNewCategory()
+    
+      
+    private void AddDefaultCategory()
+    {
+        categoriesRef.Child("По умолчанию").SetValueAsync("#9792F7");
+    }
+
+
+    public void AddNewCategory()
    {
-       categoryClass newObject = new categoryClass(0, colour.text);
-       string json = JsonUtility.ToJson(newObject);
-       categoriesRef.Child(name.text).SetRawJsonValueAsync(json);
+       categoriesRef.Child(nameCategory.text).SetValueAsync(colour.text);
        ClearTextBoxes();
        AddNewCategoryPanel.SetActive(false);
   }
-
-   public void DeleteCategory()
-    {
-        categoriesRef.Child(choosenCategory).RemoveValueAsync();
-        _delete = false;
-        ConfirmDeleting.gameObject.SetActive(false);
-    }
    
-    private void generateCategories()
+    private void GenerateCategories()
     {
         for (int i = 0; i < valuesCategories.Count; i++)
         {
-            GameObject a = Instantiate(myPrefab);
+          /*  GameObject a = Instantiate(myPrefab);
             a.transform.SetParent(content.transform, false);
-            generateTextCategories(i);
+            generateTextCategories(i);*/
+          // GameObject nameObj = currentObject.Find("CategoryName").gameObject;
+          // GameObject colorObj = currentObject.Find("CategoryColor").gameObject;
+
+          GameObject a = Instantiate(myPrefab);
+          Transform currentObject = a.transform;
+          
+          Transform colorObj = currentObject.GetChild(0);
+          Transform nameObj = currentObject.GetChild(1);
+          
+          nameObj.GetComponent<TextMeshProUGUI>().text = valuesCategories[i][0];
+          if (ColorUtility.TryParseHtmlString(valuesCategories[i][1], out var newCol))
+          {
+              colorObj.GetComponent<Image>().color = newCol;
+          }
+          currentObject.SetParent(content.transform, false);
+          
         }
     }
 
@@ -131,28 +133,19 @@ public class MainScreenCategories : MonoBehaviour
 
         Transform obj = content.GetChild(content.childCount - 1);
         GameObject nameO = obj.Find("CategoryName").gameObject;
-        GameObject countO = obj.Find("CategoryCount").gameObject;
         GameObject colorO = obj.Find("CategoryColor").gameObject;
 
         nameO.GetComponent<TextMeshProUGUI>().text = valuesCategories[i][0];
-        countO.GetComponent<TextMeshProUGUI>().text = valuesCategories[i][1];
 
-        if (ColorUtility.TryParseHtmlString(valuesCategories[i][2], out newCol))
+        if (ColorUtility.TryParseHtmlString(valuesCategories[i][1], out newCol))
         {
             colorO.GetComponent<Image>().color = newCol;
         }
     }
-    
-    
-    public void CloseConfirmPanel()
-    {
-        _delete = false;
-        ConfirmDeleting.gameObject.SetActive(false);
-    }
 
     private void ClearTextBoxes()
     {
-        name.text = "";
+        nameCategory.text = "";
         colour.text = "#000000";
     }
 
@@ -161,8 +154,8 @@ public class MainScreenCategories : MonoBehaviour
         foreach (Transform child in content.transform)
         {
             Destroy(child.gameObject);
-            valuesCategories.Clear();
         }
+        valuesCategories.Clear();
     }
 
 }
