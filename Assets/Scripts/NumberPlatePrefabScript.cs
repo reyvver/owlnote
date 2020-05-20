@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class NumberPlatePrefabScript : MonoBehaviour
 {
     private EventsManagment script;
+    private MainScreenNotes notes;
     public TextMeshProUGUI number;
     private Transform content;
 
@@ -14,6 +15,7 @@ public class NumberPlatePrefabScript : MonoBehaviour
     void Start()
     {
         script = GameObject.Find("SceneManager").GetComponent<EventsManagment>();
+        notes = GameObject.Find("SceneManager").GetComponent<MainScreenNotes>();
         content = GameObject.Find("NumberPanel").transform;
     }
 
@@ -42,6 +44,7 @@ public class NumberPlatePrefabScript : MonoBehaviour
         text = newDate.Day.ToString();
 
         script.UpdateContent();
+        notes.UpdateContent();
         CleanAll();
     }
     

@@ -12,13 +12,14 @@ public class MainScreenSceneManager : MonoBehaviour
     private LogOut LogOutScript;
     public GameObject TodayPlate, NumberPanel;
 
+    public Transform content;
 
     private List<int> NumberOfDaysInMonths = new List<int>();
     private List<GameObject> NumberPlates = new List<GameObject>();
     private List<GameObject> NumberDays = new List<GameObject>();
     public GameObject AddPanel, ButtonAdd;
     public TextMeshProUGUI tCurrentDay, tMonth, tDayOfWeek;
-    public GameObject panelSuccess;
+    public GameObject panelSuccess,EmptySchedule;
 
     private CultureInfo localCultureInfo = new CultureInfo("ru-RU");
     
@@ -206,5 +207,48 @@ public class MainScreenSceneManager : MonoBehaviour
     public void OpenCalendarPage(GameObject obj)
     {
         obj.SetActive(false);
+    }
+
+
+    public void CheckEmptyTimetable()
+    {
+        Transform EventContent = content.GetChild(1);
+        Transform NoteContent = content.GetChild(3);
+        
+        if (EventContent.childCount == 0 && NoteContent.childCount == 0)
+        {
+            content.gameObject.SetActive(false);
+            EmptySchedule.SetActive(true);
+        }
+        else
+        {
+            Debug.Log("sыыыыыыыы" + EventContent.childCount);
+            content.gameObject.SetActive(true);
+            EmptySchedule.SetActive(false);
+        
+            if (EventContent.childCount == 0)
+            {
+                EventContent.gameObject.SetActive(false);
+                content.GetChild(0).gameObject.SetActive(false);
+                Debug.Log("sdsd");
+            }
+            else
+            {
+                EventContent.gameObject.SetActive(true);
+                content.GetChild(0).gameObject.SetActive(true);
+            }
+
+            if (NoteContent.childCount == 0)
+            {
+                NoteContent.gameObject.SetActive(false);
+                content.GetChild(2).gameObject.SetActive(false);
+            }
+            else
+            {
+                NoteContent.gameObject.SetActive(true);
+               content.GetChild(2).gameObject.SetActive(true);
+            }
+            Canvas.ForceUpdateCanvases();
+        }
     }
 }

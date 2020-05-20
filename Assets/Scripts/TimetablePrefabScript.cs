@@ -10,10 +10,20 @@ public class TimetablePrefabScript : MonoBehaviour
     private string eventTime, eventTitle;
 
     public TextMeshProUGUI title, startTime;
+    public GameObject AdditionalInfo;
 
+    private bool shown = false;
     void Start()
     {
-        script = GameObject.Find("SceneManager").GetComponent<MainScreenScript>();
+       script = GameObject.Find("SceneManager").GetComponent<MainScreenScript>();
+    }
+
+    public void ShowFullInfo()
+    {
+        shown = !shown;
+        if(shown)
+        AdditionalInfo.SetActive(true);
+        else  AdditionalInfo.SetActive(false);
     }
 
     public void OnClickEvent(string operation)

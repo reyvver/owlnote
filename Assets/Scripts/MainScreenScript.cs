@@ -21,7 +21,7 @@ public class MainScreenScript : MonoBehaviour
     private FirebaseUser currentUser;
 
 
-    public string typeDelete, chosenTime, chosenTitle, chosenCategory, categoryColour;
+    public string typeDelete, chosenTime, chosenTitle, chosenCategory, categoryColour, chosenKey;
 
     void Start()
     {
@@ -305,10 +305,17 @@ public class MainScreenScript : MonoBehaviour
         {
             case "event":
             {
-                string date = ReplaceWith(newIventDate.text, false);
+                string date = ReplaceWith(newIventDate.text);
                 DatabaseReference  calendarRef =  FirebaseDatabase.DefaultInstance.GetReference( "/calendar/"+ currentUser.UserId+"/"+date);
                 calendarRef.Child(chosenTime).RemoveValueAsync();
             
+                break;
+            }
+            case "note":
+            {
+                string date = ReplaceWith(newIventDate.text);
+                DatabaseReference  calendarRef =  FirebaseDatabase.DefaultInstance.GetReference( "/notes/"+ currentUser.UserId+"/"+date);
+                calendarRef.Child(chosenKey).RemoveValueAsync();
                 break;
             }
             case "category":
@@ -317,6 +324,7 @@ public class MainScreenScript : MonoBehaviour
                 categoriesRef.Child(chosenCategory).RemoveValueAsync();
                 break;
             }
+            
         }
         
         ConfirmDeleting.gameObject.SetActive(false);
@@ -324,13 +332,20 @@ public class MainScreenScript : MonoBehaviour
         
     }
     
-    private string ReplaceWith(string str, bool chk)
+    private string ReplaceWith(string str)
     {
         string result = "";
-        if (chk)
-            result = str.Replace(@"\",".");
-        else    result = str.Replace(".",@"\");
+
+        if (str.Contains(@"/"))
+        {
+            result = str.Replace("/", @"\");
+        }
+        else
+        {
+            result = str.Replace(".", @"\");
+        }
         return result;
+
     
     }
 

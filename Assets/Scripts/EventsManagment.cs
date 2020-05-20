@@ -101,10 +101,10 @@ public class EventsManagment : MonoBehaviour
 
         DataSnapshot snapshot = args.Snapshot;
 
-        string date = ReplaceWith(dateToday.ToString("dd/MM/yyyy", new CultureInfo("ru-RU")));  
+        string date = ReplaceWith(dateToday.ToString("dd/MM/yyyy", new CultureInfo("ru-RU")));
         snapshot = snapshot.Child(date);
 
-        if (CheckEmptySchedule(snapshot.ChildrenCount))
+        if (snapshot.ChildrenCount>0)
         {
             foreach (DataSnapshot childDataSnapshot in snapshot.Children)
             {
@@ -118,27 +118,15 @@ public class EventsManagment : MonoBehaviour
             }
 
             generateEvents();
-    }
-
-    }
-
-    private bool CheckEmptySchedule(long count)
-    {
-        if (count ==0)
-        {
-            EmptySchedule.SetActive(true);
-            return true;
         }
-        else
-        {
-            EmptySchedule.SetActive(false);
-            return true;
+
+        mainScriptSceneManager.CheckEmptyTimetable();
         }
-    }
+
 
     private void generateEvents()
     {
-        if (CheckEmptySchedule(valuesEvents.Count))
+        if (valuesEvents.Count>0)
         {
             for (int i = 0; i < valuesEvents.Count; i++)
             {
@@ -269,19 +257,19 @@ public class EventsManagment : MonoBehaviour
     public void UpdateContent()
     {
         ClearContent();
-   
         string date = ReplaceWith(dateToday.ToString("dd/MM/yyyy", new CultureInfo("ru-RU")));  
         calendarDayRef =  FirebaseDatabase.DefaultInstance.GetReference( "/calendar/"+ currentUser.UserId + "/"+ date).Reference;
-        StartCoroutine(viewIvents());
+        StartCoroutine(ViewEvents());
     }
     
     
-    IEnumerator viewIvents()
+    IEnumerator ViewEvents()
     {
        // Debug.Log(dateToday);
         getData();
         yield return new WaitUntil(() => _dataReceived);
         generateEvents();
+        mainScriptSceneManager.CheckEmptyTimetable();
     }
     
     private void getData()
