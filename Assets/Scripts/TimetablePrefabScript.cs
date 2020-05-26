@@ -15,7 +15,7 @@ public class TimetablePrefabScript : MonoBehaviour
     private bool shown = false;
     void Start()
     {
-       script = GameObject.Find("SceneManager").GetComponent<MainScreenScript>();
+       //script = GameObject.Find("SceneManager").GetComponent<MainScreenScript>();
     }
 
     public void ShowFullInfo()
@@ -24,6 +24,7 @@ public class TimetablePrefabScript : MonoBehaviour
         if(shown)
         AdditionalInfo.SetActive(true);
         else  AdditionalInfo.SetActive(false);
+        Canvas.ForceUpdateCanvases();
     }
 
     public void OnClickEvent(string operation)

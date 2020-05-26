@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Firebase;
+
 using UnityEngine;
+
+using Firebase;
 using Firebase.Auth;
 using Firebase.Database;
 using UnityEngine.SceneManagement;
@@ -19,6 +21,7 @@ public class MainScreenScript : MonoBehaviour
     private bool _chkEmail, _reauthenticate, _passwordReset, _userDeleted;
     private string _errorMessage, operation,email;
     private FirebaseUser currentUser;
+
 
 
     public string typeDelete, chosenTime, chosenTitle, chosenCategory, categoryColour, chosenKey;
@@ -115,6 +118,7 @@ public class MainScreenScript : MonoBehaviour
     //подтверждение важной операции через реавторизацию
     private void Reauthenticate(string pass)
     {
+        Debug.Log("мы тут");
         FirebaseUser user = FirebaseAuth.DefaultInstance.CurrentUser;
         string email = user.Email;
         string password = pass;

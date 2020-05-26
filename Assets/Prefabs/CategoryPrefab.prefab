@@ -61,6 +61,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -117,7 +118,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8676238818800814692}
+      - m_Target: {fileID: 0}
         m_MethodName: OnClickCategory
         m_Mode: 5
         m_Arguments:
@@ -139,9 +140,9 @@ GameObject:
   - component: {fileID: 8856142998171382376}
   - component: {fileID: 7855087271967793427}
   - component: {fileID: 4452714077710225471}
-  - component: {fileID: 8676238818800814692}
+  - component: {fileID: 339648253253189957}
   m_Layer: 5
-  m_Name: CategoryNew
+  m_Name: CategoryPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -193,6 +194,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -206,7 +208,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &8676238818800814692
+--- !u!114 &339648253253189957
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -215,13 +217,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 462942331194852217}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3701e7a0e450f9140b3d4ecc7198eaf6, type: 3}
+  m_Script: {fileID: 11500000, guid: e625bda7f28d7e34baa2f67c11f5ada9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  name: {fileID: 4050542779960765378}
-  color: 
-  butDelete: {fileID: 5416008180890410597}
+  deleteButton: {fileID: 5416008180890410597}
+  selectCategory: {fileID: 450835943730861744}
   pick: {fileID: 4771123584317756275}
+  categoryName: {fileID: 4050542779960765378}
 --- !u!1 &1848971246828750710
 GameObject:
   m_ObjectHideFlags: 0
@@ -283,6 +285,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -439,6 +442,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -511,6 +515,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.0664978, g: 0, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -586,6 +591,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -642,7 +648,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8676238818800814692}
+      - m_Target: {fileID: 0}
         m_MethodName: OnClickCategory
         m_Mode: 5
         m_Arguments:
@@ -713,6 +719,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0.6862745}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []

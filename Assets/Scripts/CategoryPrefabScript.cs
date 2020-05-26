@@ -2,7 +2,7 @@
 using TMPro;
 using UnityEngine.UI;
 
-public class CategoryPrefabScript : MonoBehaviour
+public partial class CategoryPrefabScript : MonoBehaviour
 {
     private MainScreenScript script;
     public new TMP_Text name;

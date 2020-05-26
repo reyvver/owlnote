@@ -233,8 +233,7 @@ public class EventsManagment : MonoBehaviour
         foreach (Transform child in content.transform)
         {
             Destroy(child.gameObject);
- 
-        }
+ }
         valuesEvents.Clear();
     }
 
