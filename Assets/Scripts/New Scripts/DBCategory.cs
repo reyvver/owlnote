@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Firebase;
 using Firebase.Auth;
 using Firebase.Database;

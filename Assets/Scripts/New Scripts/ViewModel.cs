@@ -42,6 +42,17 @@ public class ViewModel : MonoBehaviour
     }
 
 
+    
+    private static Dictionary<string, List<MNote>> notesValues = new Dictionary<string, List<MNote>>();
+    private static Dictionary<string, List<MNote>> NotesValues
+    {
+        get { return notesValues; }
+        set
+        {
+            notesValues = value;
+        }
+    }
+
 
 
 
@@ -117,8 +128,8 @@ public class ViewModel : MonoBehaviour
     }
     public static void AddNewEvent(Dictionary<string, string> newEvent)
     {
-        newEvent["categoryColour"] = selectedCategoryColour;
-        newEvent["categoryName"] = selectedCategoryName;
+        newEvent.Add("categoryColour",selectedCategoryColour);
+        newEvent.Add("categoryName",selectedCategoryName);
         DBEvent.DBEventAdd(dateSelected, newEvent);
     }
     public static void DeleteEvent()
@@ -151,10 +162,6 @@ public class ViewModel : MonoBehaviour
         DBCategory.DBCategoryDelete(key);
     }
     
-    
-    
- 
-
     private static void ClearContent(Transform content)
     {
         if(content.childCount > 0)
@@ -166,6 +173,11 @@ public class ViewModel : MonoBehaviour
             } 
     }
 
-  
+ 
+ 
+    public static void SetNotesValues(Dictionary<string, List<MNote>> newNotesValues)
+    {
+        NotesValues = newNotesValues;
+    }
 
 }

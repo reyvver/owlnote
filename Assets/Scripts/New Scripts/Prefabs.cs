@@ -12,13 +12,13 @@ public class Prefabs : MonoBehaviour
         Transform mainContent = currentObject.GetChild(0);
         Transform additionalContent = currentObject.GetChild(1);
         
-        Transform colorObj = mainContent.GetChild(0);
-        Transform titleObj = mainContent.GetChild(1);
-        Transform startTime =  mainContent.GetChild(2).GetChild(0);
-        Transform endTime =  mainContent.GetChild(2).GetChild(2);
-        
-        Transform category =  additionalContent.GetChild(0).GetChild(1);
-        Transform description = additionalContent.GetChild(1).GetChild(1).GetChild(0);
+        Transform colorObj = mainContent.Find("EventColour");
+        Transform titleObj = mainContent.Find("EventTitle");
+        Transform startTime = mainContent.Find("TimePanel/TimeStart");
+        Transform endTime =  mainContent.Find("TimePanel/TimeEnd");
+
+        Transform category = additionalContent.Find("Category/CategoryText");
+        Transform description = additionalContent.Find("Description/TextScroll/DescriptionText");
 
 
         titleObj.GetComponent<TextMeshProUGUI>().text = currentEvent.Title;

@@ -33,7 +33,8 @@ public class View : MonoBehaviour
     public Transform DatePlatesContainer;
     public Transform PanelSuccessfulOperation;
     public Transform AddEventPanel;
-
+    public Transform HeaderTitle;
+    
     public Text newCategoryColour;
 
     private ScrollRectScript time;
@@ -48,13 +49,15 @@ public class View : MonoBehaviour
     private List<int> NumberOfDaysInMonths = new List<int>(); // дни в месяце
     private string[] DaysToString = new[] {"ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"};
     public  List<GameObject> OpenedPanels;
-
+    private CultureInfo localCultureInfo = new CultureInfo("ru-RU");
 
     private static Dictionary<string, List<MEvent>> eventsValues = new Dictionary<string, List<MEvent>>();
     private Dictionary<string, string> categoriesValues = new Dictionary<string, string>();
 
 
-
+    [NonSerialized] public TextMeshProUGUI eventStart, eventEnd, errorEventLabel, eventCategory;
+    [NonSerialized] public TMP_InputField eventTitle, eventDescription;
+    [NonSerialized] public TextMeshProUGUI todayMonth, todayDayOfWeek;
 
     private Color32 _greyLightCustom = new Color32(245, 245, 245, 255);
     private Color32 _greyDarkCustom = new Color32(108, 108, 108, 255);
@@ -83,13 +86,28 @@ public class View : MonoBehaviour
 
     private void Start()
     {
-        dateCurrent = DateTime.Today.ToString("dd/MM/yyyy", new CultureInfo("ru-RU"));
+        dateCurrent = DateTime.Today.ToString("dd/MM/yyyy", localCultureInfo);
         dateSelected.text = dateCurrent;
         deletePanel = DeleteConfirmPanel;
         time = TimePicker.GetComponent<ScrollRectScript>();
-
-        successText = PanelSuccessfulOperation.GetChild(0).GetChild(2).GetComponent<TextMeshProUGUI>();
         
+        successText = PanelSuccessfulOperation.Find("PanelSuccess/TextMessage").GetComponent<TextMeshProUGUI>();
+        
+        eventStart = AddEventPanel.Find("TimePickSection/PanelSetStartTime/PanelSelectButton/TimeStart").GetComponent<TextMeshProUGUI>();
+        eventEnd = AddEventPanel.Find("TimePickSection/PanelSetEndTime/PanelSelectButton/TimeEnd").GetComponent<TextMeshProUGUI>();
+        eventCategory = AddEventPanel.Find("CategorySection/SelectCategoryButton/CategoryPickLabel").GetComponent<TextMeshProUGUI>();
+        errorEventLabel = AddEventPanel.GetChild(5).GetComponent<TextMeshProUGUI>();
+
+        eventTitle = AddEventPanel.Find("TitleSection/TitleInput").GetComponent<TMP_InputField>();
+        eventDescription = AddEventPanel.Find("AdditionalInfoSection/DescriptionPanel/Description").GetComponent<TMP_InputField>();
+
+        todayMonth = HeaderTitle.GetChild(0).GetComponent<TextMeshProUGUI>();
+        todayDayOfWeek = HeaderTitle.GetChild(1).GetComponent<TextMeshProUGUI>();
+        
+        todayMonth.text = ToTitleCase(localCultureInfo.DateTimeFormat.GetMonthName(DateTime.Today.Month)); 
+        todayDayOfWeek.text = ToTitleCase(localCultureInfo.DateTimeFormat.GetDayName(DateTime.Today.DayOfWeek));
+        
+
         InitialiseDatesPlates(); //инициализируем панель для быстрого выбора даты
         ShowSelectedDatePanel(DatePlatesContainer.GetChild(0)); // сегодняшняя дата
     }
@@ -151,7 +169,7 @@ public class View : MonoBehaviour
         }
 
         DateTime newDate = new DateTime(year, month, day);
-        string dateToString = newDate.ToString("dd/MM/yyyy", new CultureInfo("ru-RU"));
+        string dateToString = newDate.ToString("dd/MM/yyyy", localCultureInfo);
         dateSelected.text = dateToString;
     }
     /*Цветом показываем какой день выбран*/
@@ -177,17 +195,14 @@ public class View : MonoBehaviour
             }
         }
     }
-
-
-
-
-
     /*Если изменилась дата, относительно которой надо показывать расписание*/
     public void OnDateSelectedChanged()
     {
         ViewModel.dateSelected = dateSelected.text;
         ViewModel.ShowEvents();
     }
+    
+    
     
 
     /*Определяет количество дней в каждом месяце*/
@@ -286,14 +301,7 @@ public class View : MonoBehaviour
             ViewModel.selectedCategoryName;
         CloseLastPanel();
     }
-
-    private void SetDefaultCategory()
-    {
-        AddEventPanel.GetChild(2).GetChild(1).GetChild(0).GetComponent<TextMeshProUGUI>().text = "По умолчанию";
-        ViewModel.selectedCategoryName = "По умолчанию";
-        ViewModel.selectedCategoryColour = "#9792F7";
-    }
-
+    
     public void AddCategory(TMP_InputField keyCategory)
     {
         string categoryName = keyCategory.text;
@@ -361,36 +369,30 @@ public class View : MonoBehaviour
     }
 
 
+
     public void AddNewEvent()
     {
-        TMP_InputField title = AddEventPanel.GetChild(1).GetChild(1).GetComponent<TMP_InputField>();
-        TextMeshProUGUI startTime = AddEventPanel.GetChild(3).GetChild(2).GetChild(1).GetChild(0).GetComponent<TextMeshProUGUI>();
-        TextMeshProUGUI endTime = AddEventPanel.GetChild(3).GetChild(3).GetChild(1).GetChild(0).GetComponent<TextMeshProUGUI>();
-        TMP_InputField description = AddEventPanel.GetChild(4).GetChild(2).GetChild(1).GetComponent<TMP_InputField>();
-        
-        TextMeshProUGUI errorLabel = AddEventPanel.GetChild(5).GetComponent<TextMeshProUGUI>();
-        
-        if (title.text != "" && startTime.text != "Не выбрано" & endTime.text != "Не выбрано")
+        if (eventTitle.text != "" && eventStart.text != "Не выбрано" && eventEnd.text != "Не выбрано")
         {
+
+            Dictionary<string, string> values = new Dictionary<string, string>
+            {
+                {"title", eventTitle.text}, {"startTime", eventStart.text}, {"endTime", eventEnd.text}
+            };
+
+            if (eventDescription.text != "")
+                values.Add("description", eventDescription.text);
             
-           Dictionary<string, string> values = new Dictionary<string, string>
-           {
-               {"title", title.text}, {"startTime", startTime.text}, {"endTime", endTime.text}
-           };
-           
-           if (description.text!="")
-            values.Add("description", description.text);
-           
-           ViewModel.AddNewEvent(values);
-           CloseAll();
-           successText.text = "Добавлен пункт расписания";
-           OpenPanel(PanelSuccessfulOperation.gameObject);
-           SetDefaultCategory();
+            ViewModel.AddNewEvent(values);
+            CloseAll();
+            successText.text = "Добавлен пункт расписания";
+            OpenPanel(PanelSuccessfulOperation.gameObject);
+            ClearEventInfo();
         }
         else
-            errorLabel.text = "Ошибка: не все обязательные поля заполнены.";
+            errorEventLabel.text = "Ошибка: не все обязательные поля заполнены.";
     }
-    
+
     public void ShowSelectTimePanel(GameObject panel)
     {
         currentTimeSelection = panel;
@@ -411,6 +413,23 @@ public class View : MonoBehaviour
         else timeText.text = time.hours + ":" + time.minutes;
 
         CloseLastPanel();
+    }
+
+    private void ClearEventInfo()
+    {
+        eventDescription.text = "";
+        eventEnd.text = "Не выбрано";
+        eventStart.text = "Не выбрано";
+        eventTitle.text = "";
+        eventCategory.text = "По умолчанию";
+        
+        ViewModel.selectedCategoryName = "По умолчанию";
+        ViewModel.selectedCategoryColour = "#9792F7";
+        time.SetDefaultTime();
+    }
+    private string ToTitleCase(string str)
+    {
+        return localCultureInfo.TextInfo.ToTitleCase(str.ToLower());
     }
 
 }

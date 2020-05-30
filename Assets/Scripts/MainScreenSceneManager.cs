@@ -86,7 +86,7 @@ public class MainScreenSceneManager : MonoBehaviour
     public void GetDates()
     {
         string day = DateTime.Today.Day.ToString();
-        string day_of_week =localCultureInfo.DateTimeFormat.GetDayName(DateTime.Today.DayOfWeek);
+        string day_of_week = localCultureInfo.DateTimeFormat.GetDayName(DateTime.Today.DayOfWeek);
         string month  = localCultureInfo.DateTimeFormat.GetMonthName(DateTime.Today.Month);
             
         tMonth.text = ToTitleCase(month);

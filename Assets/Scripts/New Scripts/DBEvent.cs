@@ -17,12 +17,13 @@ public class DBEvent : MonoBehaviour
     {
         public string title, endTime, categoryName, categoryColour, description;
 
-        public EventClass(string name, string end_time, string category, string colour, string description)
+        public EventClass(string name, string end_time, string category, string colour, string details)
         {
             title = name;
             endTime = end_time;
             categoryName = category;
             categoryColour = colour;
+            description = details;
         }
     }
     
@@ -98,13 +99,15 @@ public class DBEvent : MonoBehaviour
    public  static void DBEventDelete(string date, string key)
     {
         string dateEvent = ReplaceWith(date);
+        Debug.Log(dateEvent + "  "+ date);
         _reference.Child(dateEvent).Child(key).RemoveValueAsync();
     }
 
    public  static void DBEventAdd(string date, Dictionary<string, string> newEvent)
     {
-
         string dateEvent = ReplaceWith(date);
+        
+        Debug.Log(dateEvent + "  "+ date);
         string key = newEvent["startTime"];
         newEvent.Remove("startTime");
         
@@ -118,7 +121,12 @@ public class DBEvent : MonoBehaviour
        string categoryName = values["categoryName"];
        string categoryColour = values["categoryColour"];
        string endTime = values["endTime"];
-       string description = values["description"];
+       string description = "";
+       if (values.ContainsKey("description"))
+       {
+           description = values["description"];
+       }
+
        EventClass newEvent = new EventClass(title, endTime, categoryName, categoryColour, description);
        return newEvent;
    }
