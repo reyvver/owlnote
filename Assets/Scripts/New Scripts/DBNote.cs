@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
-using Firebase;
 using Firebase.Auth;
 using Firebase.Database;
-using Firebase.Unity.Editor;
 using UnityEngine;
+
 public class DBNote : MonoBehaviour
 {
     private static Dictionary<string, List<MNote>> notesValues = new Dictionary<string,  List<MNote>>();
 
     private static DatabaseReference _reference;
-
+    
+    
     private void Start()
     {
         InitializeDatabase();
@@ -17,7 +17,6 @@ public class DBNote : MonoBehaviour
     
     private void InitializeDatabase()
     {
-        FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://owlnote-dragunovatv.firebaseio.com/");
         _reference = FirebaseDatabase.DefaultInstance.GetReference("/notes/" + FirebaseAuth.DefaultInstance.CurrentUser.UserId);
         _reference.ValueChanged += HandleValueChanged;
         Debug.Log("done notes");
@@ -72,22 +71,31 @@ public class DBNote : MonoBehaviour
                     }
                 }
         }
-        
-        
         ViewModel.SetNotesValues(notesValues);
     }
 
-    public static void DBCategoryDelete(string key)
+    public static void DBNoteDelete(string date, string key)
     {
-
+        string dateNote = ReplaceWith(date);
+        _reference.Child(dateNote).Child(key).RemoveValueAsync();
     }
 
-    public static void DBEventAdd(string name, string colour)
+    public static void DBNoteAdd(string date, string text)
     {
-
+        string dateNote = ReplaceWith(date);
+        
+        string key = _reference.Child(dateNote).Push().Key;
+        
+        _reference.Child(dateNote).Child(key).SetValueAsync(text);
     }
     
-    private  string ReplaceWith(string str)
+    public  static  void DBNoteUpdate(string date, string key, string newValue)
+    {
+        string dateNote = ReplaceWith(date);
+
+        _reference.Child(dateNote).Child(key).SetValueAsync(newValue);
+    }
+    private static string ReplaceWith(string str)
     {
         string result = "";
 

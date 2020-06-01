@@ -12,15 +12,21 @@ public class View : MonoBehaviour
     public Transform EventsContainer;
     public Transform NotesContainer;
     public Transform CategoriesContainer;
+    public Transform ToDoObjectsContainer;
+    public Transform ToDoContainer;
 
     [Header("Headers of containers")] 
     public GameObject EventsHeader;
     public GameObject NotesHeader;
+    public GameObject ToDoHeader;
 
     [Header("Prefabs")]
     public GameObject EventPrefab;
     public GameObject NotePrefab;
     public GameObject CategoryPrefab;
+    public GameObject ToDoObjectPrefab;
+    public GameObject ToDoListPrefab;
+    public GameObject ToDoItemPrefab;
 
     [Header("UI elements")] 
     public GameObject EmptySchedulePanel;
@@ -28,24 +34,28 @@ public class View : MonoBehaviour
     public GameObject TimePicker;
     public GameObject SelectTimePanel;
     public GameObject EmailVerifyPanel;
+    public GameObject UpdateNotePanel;
     
     public TMP_InputField dateSelected;
     public Transform DatePlatesContainer;
     public Transform PanelSuccessfulOperation;
     public Transform AddEventPanel;
     public Transform HeaderTitle;
-    
     public Text newCategoryColour;
 
     private ScrollRectScript time;
     private string dateCurrent;
-    private static string typeDelete;
+    private static string typeObject;
     private static string currentKey;
     private bool _importantOperation;
     private static GameObject deletePanel;
     private TextMeshProUGUI successText;
-    private GameObject currentTimeSelection;
 
+    private GameObject currentTimeSelection;
+    private static GameObject noteUpdate;
+ 
+    public static TMP_InputField noteUpdateText;
+    
     private List<int> NumberOfDaysInMonths = new List<int>(); // дни в месяце
     private string[] DaysToString = new[] {"ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"};
     public  List<GameObject> OpenedPanels;
@@ -80,6 +90,14 @@ public class View : MonoBehaviour
         
         ViewModel.EmptySchedulePanel = EmptySchedulePanel;
         ViewModel.EmailVerifyPanel = EmailVerifyPanel;
+
+        ViewModel.ToDoObjectPrefab = ToDoObjectPrefab;
+        ViewModel.ToDoObjectsContainer = ToDoObjectsContainer;
+
+        ViewModel.ToDoContainer = ToDoContainer;
+        ViewModel.ToDoHeader = ToDoHeader;
+        ViewModel.ToDoItemPrefab = ToDoItemPrefab;
+        ViewModel.TodoListPrefab = ToDoListPrefab;
         
         Debug.Log("done with viewmodel");
     }
@@ -90,27 +108,35 @@ public class View : MonoBehaviour
         dateSelected.text = dateCurrent;
         deletePanel = DeleteConfirmPanel;
         time = TimePicker.GetComponent<ScrollRectScript>();
-        
+
         successText = PanelSuccessfulOperation.Find("PanelSuccess/TextMessage").GetComponent<TextMeshProUGUI>();
-        
-        eventStart = AddEventPanel.Find("TimePickSection/PanelSetStartTime/PanelSelectButton/TimeStart").GetComponent<TextMeshProUGUI>();
-        eventEnd = AddEventPanel.Find("TimePickSection/PanelSetEndTime/PanelSelectButton/TimeEnd").GetComponent<TextMeshProUGUI>();
-        eventCategory = AddEventPanel.Find("CategorySection/SelectCategoryButton/CategoryPickLabel").GetComponent<TextMeshProUGUI>();
+
+        eventStart = AddEventPanel.Find("TimePickSection/PanelSetStartTime/PanelSelectButton/TimeStart")
+            .GetComponent<TextMeshProUGUI>();
+        eventEnd = AddEventPanel.Find("TimePickSection/PanelSetEndTime/PanelSelectButton/TimeEnd")
+            .GetComponent<TextMeshProUGUI>();
+        eventCategory = AddEventPanel.Find("CategorySection/SelectCategoryButton/CategoryPickLabel")
+            .GetComponent<TextMeshProUGUI>();
         errorEventLabel = AddEventPanel.GetChild(5).GetComponent<TextMeshProUGUI>();
 
         eventTitle = AddEventPanel.Find("TitleSection/TitleInput").GetComponent<TMP_InputField>();
-        eventDescription = AddEventPanel.Find("AdditionalInfoSection/DescriptionPanel/Description").GetComponent<TMP_InputField>();
+        eventDescription = AddEventPanel.Find("AdditionalInfoSection/DescriptionPanel/Description")
+            .GetComponent<TMP_InputField>();
 
         todayMonth = HeaderTitle.GetChild(0).GetComponent<TextMeshProUGUI>();
         todayDayOfWeek = HeaderTitle.GetChild(1).GetComponent<TextMeshProUGUI>();
-        
-        todayMonth.text = ToTitleCase(localCultureInfo.DateTimeFormat.GetMonthName(DateTime.Today.Month)); 
+
+        todayMonth.text = ToTitleCase(localCultureInfo.DateTimeFormat.GetMonthName(DateTime.Today.Month));
         todayDayOfWeek.text = ToTitleCase(localCultureInfo.DateTimeFormat.GetDayName(DateTime.Today.DayOfWeek));
-        
+
+
+        noteUpdate = UpdateNotePanel;
+        noteUpdateText = UpdateNotePanel.transform.Find("Panel/NoteText").GetComponent<TMP_InputField>();
 
         InitialiseDatesPlates(); //инициализируем панель для быстрого выбора даты
         ShowSelectedDatePanel(DatePlatesContainer.GetChild(0)); // сегодняшняя дата
     }
+
     private void Update()
     {
         if (!Input.GetKeyDown(KeyCode.Escape)) return;
@@ -126,11 +152,7 @@ public class View : MonoBehaviour
 
             if (OpenedPanels[lastPanelIndex] == PanelSuccessfulOperation)
             {
-                // if (_importantOperation) LogOutScript.LogOutUser();
-                //   else
-                // {
                 CloseAll();
-                // }
             }
             else
             {
@@ -138,7 +160,6 @@ public class View : MonoBehaviour
             }
         }
     }
-
 
     
     /*При выборе новой даты*/
@@ -200,6 +221,8 @@ public class View : MonoBehaviour
     {
         ViewModel.dateSelected = dateSelected.text;
         ViewModel.ShowEvents();
+        ViewModel.ShowNotes();
+        ViewModel.ShowTodo();
     }
     
     
@@ -301,7 +324,6 @@ public class View : MonoBehaviour
             ViewModel.selectedCategoryName;
         CloseLastPanel();
     }
-    
     public void AddCategory(TMP_InputField keyCategory)
     {
         string categoryName = keyCategory.text;
@@ -314,62 +336,17 @@ public class View : MonoBehaviour
         }
 
     }
-
-    public static void Delete(TextMeshProUGUI key, string type, string other)
+    public void AddNote(TMP_InputField valueNote)
     {
-        typeDelete = type;
-        
-        deletePanel.gameObject.SetActive(true);
-        deletePanel.transform.SetAsLastSibling();
-        
-            UpdateDeleteMessage(key.text);
-            currentKey = key.text;
-    }
-    
-    private static void UpdateDeleteMessage(string title)
-    {
-        TextMeshProUGUI message = deletePanel.transform.GetChild(0).GetChild(2).GetComponent<TextMeshProUGUI>();
-        
-        switch (typeDelete)
+        if (valueNote.text != "")
         {
-            case "event":
-            {
-                message.text = "пункт расписания " + "'"+ title + "'";
-                break;
-            }
-            case "category":
-            {
-                message.text = "категорию " + "'" + title + "'";
-                break;
-            }
+            ViewModel.AddNewNote(valueNote.text);
+            CloseAll();
+            successText.text = "Добавлена новая заметка";
+            OpenPanel(PanelSuccessfulOperation.gameObject);
+            valueNote.text = "";
         }
     }
-
-    public void DeleteInfo()
-    {
-        switch (typeDelete)
-        {
-            case "event":
-            {
-                ViewModel.DeleteEvent();
-                break;
-            }
-            case "note":
-            {
-                break;
-            }
-            case "category":
-            {
-                ViewModel.DeleteCategory(currentKey);
-                break;
-            }
-        }
-        DeleteConfirmPanel.gameObject.SetActive(false);
-        DeleteConfirmPanel.transform.SetAsFirstSibling();
-    }
-
-
-
     public void AddNewEvent()
     {
         if (eventTitle.text != "" && eventStart.text != "Не выбрано" && eventEnd.text != "Не выбрано")
@@ -392,6 +369,78 @@ public class View : MonoBehaviour
         else
             errorEventLabel.text = "Ошибка: не все обязательные поля заполнены.";
     }
+    
+    
+    public static void Delete(TextMeshProUGUI key, string type)
+    {
+        typeObject = type;
+        
+        deletePanel.gameObject.SetActive(true);
+        deletePanel.transform.SetAsLastSibling();
+        
+        UpdateDeleteMessage(key.text);
+        currentKey = key.text;
+    }
+    private static void UpdateDeleteMessage(string title)
+    {
+        TextMeshProUGUI message = deletePanel.transform.GetChild(0).GetChild(2).GetComponent<TextMeshProUGUI>();
+        
+        switch (typeObject)
+        {
+            case "event":
+            {
+                message.text = "пункт расписания " + "'"+ title + "' ?";
+                break;
+            }
+            case "category":
+            {
+                message.text = "категорию " + "'" + title + "' ?";
+                break;
+            }
+            case "note":
+            {
+                message.text = "выбранную заметку?";
+                break;
+            }
+            case "list":
+            {
+                message.text = "список " + "'" + title + "' ?";
+                break;
+            }
+        }
+    }
+    public void DeleteInfo()
+    {
+        switch (typeObject)
+        {
+            case "event":
+            {
+                ViewModel.DeleteEvent();
+                break;
+            }
+            case "note":
+            {
+                ViewModel.DeleteNote();
+                break;
+            }
+            case "category":
+            {
+                ViewModel.DeleteCategory();
+                break;
+            }
+            case "list":
+            {
+                ViewModel.DeleteList();
+                break;
+            }
+        }
+        DeleteConfirmPanel.gameObject.SetActive(false);
+        DeleteConfirmPanel.transform.SetAsFirstSibling();
+    }
+
+
+
+  
 
     public void ShowSelectTimePanel(GameObject panel)
     {
@@ -400,7 +449,6 @@ public class View : MonoBehaviour
         OpenPanel(SelectTimePanel);
         
     }
-
     public void SetTime()
     {
         TextMeshProUGUI timeText = currentTimeSelection.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
@@ -415,6 +463,7 @@ public class View : MonoBehaviour
         CloseLastPanel();
     }
 
+    
     private void ClearEventInfo()
     {
         eventDescription.text = "";
@@ -422,6 +471,7 @@ public class View : MonoBehaviour
         eventStart.text = "Не выбрано";
         eventTitle.text = "";
         eventCategory.text = "По умолчанию";
+        errorEventLabel.text = "";
         
         ViewModel.selectedCategoryName = "По умолчанию";
         ViewModel.selectedCategoryColour = "#9792F7";
@@ -432,4 +482,36 @@ public class View : MonoBehaviour
         return localCultureInfo.TextInfo.ToTitleCase(str.ToLower());
     }
 
+
+    public static void UpdateNote(string currentValue)
+    {
+        typeObject = "note";
+        noteUpdate.SetActive(true);
+        noteUpdate.transform.SetAsLastSibling();
+        noteUpdateText.text = currentValue;
+    }
+
+
+    public void UpdateProperties()
+    {
+        switch (typeObject)
+        {
+            case "note":
+            {
+                if(noteUpdateText.text!="")
+                ViewModel.UpdateNote(noteUpdateText.text);
+                UpdateNotePanel.SetActive(false);
+                noteUpdateText.text = "";
+                break;
+            }
+        }
+    }
+    public void AddNewTodoItem(TMP_InputField input)
+    {
+        string value = input.text;
+
+        if (value == "") value = "По умолчанию";
+        ViewModel.AddTodoObject(value);
+        input.text = "";
+    }
 }

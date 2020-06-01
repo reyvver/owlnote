@@ -21,8 +21,9 @@ public class PrefabCategory : MonoBehaviour
     }
     
     private void OnDeleteButton()
-    { 
-        View.Delete(categoryName,"category","");
+    {
+        ViewModel.currentKey = categoryName.text;
+        View.Delete(categoryName,"category");
     }
 
     private void OnSelectCategory()

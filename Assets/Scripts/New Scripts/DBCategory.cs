@@ -19,7 +19,6 @@ public class DBCategory: MonoBehaviour
     
     private void InitializeDatabase()
     {
-        FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://owlnote-dragunovatv.firebaseio.com/");
         _reference = FirebaseDatabase.DefaultInstance.GetReference("/categories/" + FirebaseAuth.DefaultInstance.CurrentUser.UserId);
         _reference.ValueChanged += HandleValueChanged;
         Debug.Log("done categories");
@@ -62,7 +61,6 @@ public class DBCategory: MonoBehaviour
                 categoriesValues.Add(name,color);
             }
         }
-        
         ViewModel.SetCategoriesValues(categoriesValues);
     }
 

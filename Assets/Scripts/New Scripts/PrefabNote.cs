@@ -1,18 +1,20 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using TMPro;
 
 public class PrefabNote : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public TextMeshProUGUI noteKey, noteValue;
+
+    public void OnDeleteButton()
     {
-        
+        ViewModel.currentKey = noteKey.text;
+        View.Delete(noteKey, "note");
     }
 
-    // Update is called once per frame
-    void Update()
+    public void OnEditButton()
     {
-        
+        ViewModel.currentKey = noteKey.text;
+        View.UpdateNote(noteValue.text);
     }
 }
+

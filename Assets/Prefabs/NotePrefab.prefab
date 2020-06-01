@@ -293,7 +293,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: cdfa4153429265c46aeb367fec0cdfb4, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 6fdd5369def2ef549a94bc70a2111941, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -367,7 +367,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 0d23e0a6829736c4dbb46ef53c449824, type: 3}
+  m_Sprite: {fileID: 21300000, guid: a9c1977a9fa3e5f4d87ef935b2b11317, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -390,7 +390,7 @@ GameObject:
   - component: {fileID: 8139921774427286685}
   - component: {fileID: 8139921774427286684}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -657,7 +657,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -53.19829, y: -205.96512}
+  m_AnchoredPosition: {x: -53.19829, y: -187.75}
   m_SizeDelta: {x: 93.8, y: 87.4}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8139921775421263097
@@ -711,9 +711,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_MethodName: 
-        m_Mode: 5
+      - m_Target: {fileID: 8410087096800566275}
+        m_MethodName: OnDeleteButton
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -782,13 +782,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.5647059, g: 0.3764706, b: 1, a: 1}
+  m_Color: {r: 0.9433962, g: 0.9433962, b: 0.9433962, a: 1}
   m_RaycastTarget: 1
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 21300000, guid: c28e8dd6cdfbc481ca2415e9f982dd47, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -810,6 +810,7 @@ GameObject:
   - component: {fileID: 8139921776306543235}
   - component: {fileID: 8139921776306543234}
   - component: {fileID: 8139921776306543232}
+  - component: {fileID: 8410087096800566275}
   m_Layer: 5
   m_Name: NotePrefab
   m_TagString: Untagged
@@ -834,10 +835,10 @@ RectTransform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.5}
-  m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: 40, y: 275.4}
-  m_SizeDelta: {x: -295.99988, y: 260.26993}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 40, y: 319.4}
+  m_SizeDelta: {x: 784.0001, y: 172.18155}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8139921776306543235
 CanvasRenderer:
@@ -889,6 +890,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ShowMaskGraphic: 1
+--- !u!114 &8410087096800566275
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8139921776306543246}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d64578b3555b6f409114f22e2605ab1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  noteKey: {fileID: 2879489712368531505}
+  noteValue: {fileID: 8139921774427286685}
 --- !u!1 &8139921776317767365
 GameObject:
   m_ObjectHideFlags: 0
@@ -924,7 +939,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -53.19829, y: -72.56499}
+  m_AnchoredPosition: {x: -58.049, y: -95}
   m_SizeDelta: {x: 93.8, y: 87.4}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8139921776317767384
@@ -978,9 +993,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_MethodName: 
-        m_Mode: 3
+      - m_Target: {fileID: 8410087096800566275}
+        m_MethodName: OnEditButton
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine

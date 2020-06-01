@@ -22,7 +22,7 @@ public class PrefabEvent : MonoBehaviour
 
    private void OnDeleteButton()
    {
-       View.Delete(Title,"event", "");
+       View.Delete(Title,"event");
        ViewModel.currentKey = StartDay.text;
    }
    

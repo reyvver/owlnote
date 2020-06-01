@@ -1,17 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Firebase;
 using Firebase.Auth;
 using Firebase.Database;
 using Firebase.Unity.Editor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 public class DBEvent : MonoBehaviour
 {
     private  Dictionary<string, List<MEvent>> eventsValues = new Dictionary<string, List<MEvent>>();
-    
     private static DatabaseReference _reference;
-    
     
     public class EventClass
     {
@@ -27,6 +27,7 @@ public class DBEvent : MonoBehaviour
         }
     }
     
+
     private void Start()
     {
         InitializeDatabase();
@@ -39,6 +40,8 @@ public class DBEvent : MonoBehaviour
         _reference.ValueChanged += HandleValueChanged;
         Debug.Log("done events");
     }
+
+
 
     private void OnDestroy()
     {
@@ -99,15 +102,12 @@ public class DBEvent : MonoBehaviour
    public  static void DBEventDelete(string date, string key)
     {
         string dateEvent = ReplaceWith(date);
-        Debug.Log(dateEvent + "  "+ date);
         _reference.Child(dateEvent).Child(key).RemoveValueAsync();
     }
 
    public  static void DBEventAdd(string date, Dictionary<string, string> newEvent)
     {
         string dateEvent = ReplaceWith(date);
-        
-        Debug.Log(dateEvent + "  "+ date);
         string key = newEvent["startTime"];
         newEvent.Remove("startTime");
         

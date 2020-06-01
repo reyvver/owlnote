@@ -50,4 +50,62 @@ public class Prefabs : MonoBehaviour
             categoryColour.GetComponent<Image>().color = newCol;
         }
     }
+
+    public static void CreateNote(GameObject prefab, Transform container, MNote currentNote)
+    {
+        GameObject newObj = Instantiate(prefab, container, false);
+        Transform currentObject = newObj.transform;
+
+        Transform key = currentObject.GetChild(0);
+        Transform value = currentObject.Find("TextContainer/Text");
+
+        key.GetComponent<TextMeshProUGUI>().text = currentNote.key;
+        value.GetComponent<TextMeshProUGUI>().text = currentNote.value;
+    }
+
+    public static void CreateTodoObject(GameObject prefab, Transform container, string value, string index)
+    {
+        GameObject newObj = Instantiate(prefab, container, false);
+        Transform currentObject = newObj.transform;
+        
+        Transform label = currentObject.GetChild(1);
+        Transform key = currentObject.GetChild(3);
+
+        label.GetComponent<TextMeshProUGUI>().text = value;
+        key.GetComponent<TextMeshProUGUI>().text = index;
+    }
+    
+    public static Transform CreateTodo(GameObject prefab, Transform container, string name)
+    {
+        GameObject newObj = Instantiate(prefab, container, false);
+        Transform currentObject = newObj.transform;
+
+        Transform label = currentObject.Find("PanelHeaderTodo/Title");
+        label.GetComponent<TextMeshProUGUI>().text = name;
+
+        return currentObject.GetChild(1);
+    }
+    
+    public static void CreateTodoItem(GameObject prefab, Transform container, string value, bool check)
+    {
+        GameObject newObj = Instantiate(prefab, container, false);
+        Transform currentObject = newObj.transform;
+        Transform label = currentObject.GetChild(1);
+        Toggle checkmark = currentObject.GetComponent<Toggle>();
+        checkmark.isOn = check;
+        label.GetComponent<TextMeshProUGUI>().text = value;
+    }
+    
+    /*
+    public static void CreateTodo(GameObject prefab, Transform container, string value, string index)
+    {
+        GameObject newObj = Instantiate(prefab, container, false);
+        Transform currentObject = newObj.transform;
+        
+        Transform label = currentObject.GetChild(1);
+        Transform key = currentObject.GetChild(2);
+
+        label.GetComponent<TextMeshProUGUI>().text = value;
+        key.GetComponent<TextMeshProUGUI>().text = index;
+    }*/
 }

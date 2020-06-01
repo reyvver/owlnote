@@ -29,7 +29,6 @@ public class DBUser : MonoBehaviour
     {
         currentUser = FirebaseAuth.DefaultInstance.CurrentUser;
         textSuccess = PanelUserOperation.GetChild(1).GetComponent<TextMeshProUGUI>();
-        Debug.Log(currentUser.Email);
         ReloadUser();
     }
 
@@ -47,8 +46,8 @@ public class DBUser : MonoBehaviour
             {
                 ViewModel.EmailVerifyPanel.SetActive(false);
             }
-
             _emailVerified = false;
+
         }
 
         switch (operation)
