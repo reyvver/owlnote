@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using TMPro;
 
@@ -129,7 +130,7 @@ public class ViewModel : MonoBehaviour
         }
         else EmptySchedulePanel.SetActive(false);
         
-        Canvas.ForceUpdateCanvases();
+        //Canvas.ForceUpdateCanvases();
     }
     private static bool CheckCurrentSection(Transform container, GameObject header)
     {
@@ -270,9 +271,8 @@ public class ViewModel : MonoBehaviour
     }
     public static void AddTodoObject(string value)
     {
-        Debug.Log(value);
-        toDoObjects.Add(toDoObjectsCount.ToString(),value);
         toDoObjectsCount++;
+        toDoObjects.Add(toDoObjectsCount.ToString(),value);
         Prefabs.CreateTodoObject(ToDoObjectPrefab,ToDoObjectsContainer,value,toDoObjectsCount.ToString());
     }
     private static void ShowTodoObjects()
@@ -297,17 +297,20 @@ public class ViewModel : MonoBehaviour
         ClearContent(ToDoContainer);
                 
         string currentDate = ReplaceWith(dateSelected);
-
-        if (ToDoValues.ContainsKey(currentDate))
+        
+       if (ToDoValues.ContainsKey(currentDate))
         {
-            List<MTodo> values = ToDoValues[currentDate]; 
+            List<MTodo> values = ToDoValues[currentDate];
+
             foreach (MTodo currentList in values)
             {
                 string listName = currentList.nameList;
 
                 Transform listContainer = Prefabs.CreateTodo(TodoListPrefab, ToDoContainer, listName);
 
-                foreach (var item in currentList.itemsList)
+                var items = currentList.itemsList.OrderBy(o => o.Value);
+
+                foreach (var item in items)
                 {
                     Prefabs.CreateTodoItem(ToDoItemPrefab, listContainer, item.Key, Convert.ToBoolean(item.Value));
                 }
@@ -318,15 +321,31 @@ public class ViewModel : MonoBehaviour
         
     }
 
-    public static void AddTodo(string listName)
+    public static void AddTodo(string value)
     {
-        
+        DBTodo.AddItemInList(dateSelected,currentKey,value);
+    }
+
+    public static void DeleteListItem(string value)
+    {
+        DBTodo.DeleteListItem(dateSelected,currentKey,value);
+    }
+
+    public static void UpdateItemState(string value)
+    {
+        DBTodo.UpdateItemState(dateSelected,currentKey,value);
     }
 
     public static void DeleteList()
     {
         DBTodo.DeleteList(dateSelected,currentKey);
     }
+
+    public static void AddList(MTodo newList)
+    {
+        DBTodo.AddList(dateSelected,newList);
+    }
+
 
 
 }

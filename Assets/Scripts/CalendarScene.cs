@@ -2,19 +2,39 @@
 using UnityEngine.UI;
 using System;
 using System.Globalization;
+using System.Collections.Generic;
 using TMPro;
 
 public class CalendarScene : MonoBehaviour
 {
-
-    public TextMeshProUGUI monthText, nextText, previousText, currentYearText;
-    private int[] daysPerMonth = new[] {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    public int currentYear, currentMonth;
+    [Header("UI elements")] 
+    public Transform TimelinePanel;
+    public Transform CalendarPanel;
+    private List<Transform> weeks = new List<Transform>();
+    private TextMeshProUGUI monthText, nextText, previousText, currentYearText;
     
+    private int[] daysPerMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    public static int currentYear, currentMonth;
+    public static Transform selectedObj { get; set; }
+    public static Transform currentDay { get; set; }
+
     private CultureInfo localCultureInfo = new CultureInfo("ru-RU");
 
     void Start()
     {
+        monthText = TimelinePanel.Find("CurrentMonth/Text").GetComponent<TextMeshProUGUI>();
+        currentYearText = TimelinePanel.Find("CurrentMonth/CurrentYear").GetComponent<TextMeshProUGUI>();
+
+        
+        nextText = TimelinePanel.Find("NextMonth").GetComponent<TextMeshProUGUI>();
+        previousText = TimelinePanel.Find("PreviousMonth").GetComponent<TextMeshProUGUI>();
+       
+        
+        foreach (Transform currentWeek in CalendarPanel)
+        {
+            weeks.Add(currentWeek);
+        }
+        
         currentYear = DateTime.Today.Year;
         currentMonth = DateTime.Today.Month;
         CheckTypeOfYear();
@@ -22,7 +42,7 @@ public class CalendarScene : MonoBehaviour
         UpdateMonthTimeline();
 
     }
-
+    
     private void FillCalendar()
     {
         //Определяется день недели первого дня в месяце
@@ -32,29 +52,29 @@ public class CalendarScene : MonoBehaviour
         if (firstDayOfWeek == 0) firstDayOfWeek = 7;
         if (firstDayOfWeek == 6) firstDayOfWeek = 1;
         
-        //Для первой недели:
-        GameObject firstWeek = GameObject.Find("Week1");
+        
+        int weekNumber = 0;
+        Transform currentWeek = weeks[weekNumber];
+        
         for (int i = firstDayOfWeek; i <= 7; i++)
         {
-            Transform date = firstWeek.transform.Find(Convert.ToString(i)); //день в неделе
+            Transform date = currentWeek.Find(Convert.ToString(i));
             TextMeshProUGUI numberText = date.Find("Number").GetComponent<TextMeshProUGUI>(); //находится его текстовое поле
             numberText.text = currentDay.ToString(); //присваевается номер
-            ColourCurrentDay(date, currentDay);
             currentDay++;
         }
-
-        //Для последующих недель
+        
         for (int i = 2; i <= 6; i++)
         {
-            GameObject week = GameObject.Find("Week" + i); //берется следующая неделя
+            weekNumber++;
+            currentWeek = weeks[weekNumber]; //берется следующая неделя
             for (int j = 1; j <= 7; j++)
             {
-                Transform date = week.transform.Find(Convert.ToString(j)); //день в неделе
+                Transform date = currentWeek.Find(Convert.ToString(j)); //день в неделе
                 TextMeshProUGUI
                     numberText = date.Find("Number").GetComponent<TextMeshProUGUI>(); //находится его текстовое поле
                 numberText.text = currentDay.ToString(); //присваевается номер
-                ColourCurrentDay(date, currentDay);
-
+                
                 currentDay++;
                 if (currentDay > daysPerMonth[currentMonth - 1])
                 {
@@ -66,18 +86,8 @@ public class CalendarScene : MonoBehaviour
             if (chk)
                 break; //выход из внешнего цикла
         }
-    }
 
-    private void ColourCurrentDay(Transform date, int currentDay)
-    {
-        if (DateTime.Today.Day == currentDay && currentMonth == DateTime.Today.Month && currentYear == DateTime.Today.Year) //закрашиваем сегодняшний день
-        {
-            TextMeshProUGUI
-                numberText = date.Find("Number").GetComponent<TextMeshProUGUI>(); //находится его текстовое поле
-            Image panel = date.Find("Panel").GetComponent<Image>();
-            panel.color = new Color32(146, 96, 255, 255);
-            numberText.color = Color.white;
-        }
+        ShowTodayDate();
     }
 
     private void CheckTypeOfYear() //Если год високосный, то в феврале 29 дней
@@ -88,7 +98,6 @@ public class CalendarScene : MonoBehaviour
 
     public void NextMonth()
     {
-        ClearAll();
         currentMonth++;
         if (currentMonth == 13)
         {
@@ -101,7 +110,6 @@ public class CalendarScene : MonoBehaviour
 
     public void PreviousMonth()
     {
-        ClearAll();
         currentMonth--;
         if (currentMonth == 0)
         {
@@ -131,23 +139,50 @@ public class CalendarScene : MonoBehaviour
         return ToTitleCase(str);
     }
 
-    private void ClearAll()
+    private void ShowTodayDate()
     {
-        for (int i = 1; i <= 6; i++)
+        if (selectedObj)
         {
-            GameObject week = GameObject.Find("Week" + i); 
-            
-            for (int j = 1; j <= 7; j++)
+            ClearDayPlate(selectedObj);
+        }
+        
+        if (currentMonth == DateTime.Today.Month && currentYear == DateTime.Today.Year)
+        {
+            foreach (Transform week in weeks)
             {
-                Transform date = week.transform.Find(Convert.ToString(j));
-                TextMeshProUGUI numberText = date.Find("Number").GetComponent<TextMeshProUGUI>(); 
-                numberText.text = "";
-                Image panel = date.Find("Panel").GetComponent<Image>();
-                panel.color = new Color32(255,255,255,255);
-                numberText.color = Color.black;
+                foreach (Transform day in week)
+                {
+                    TextMeshProUGUI numberText = day.Find("Number").GetComponent<TextMeshProUGUI>();
+                    Image panel = day.Find("Panel").GetComponent<Image>();
+
+                    if (numberText.text == DateTime.Today.Day.ToString())
+                    {
+                        panel.color = InterfaceTheme.PurpleCustom;
+                        numberText.color = Color.white;
+                        currentDay = day;
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (currentDay)
+            {
+               ClearDayPlate(currentDay);
             }
         }
     }
+
+    private void ClearDayPlate(Transform day)
+    {
+        TextMeshProUGUI numberText = day.Find("Number").GetComponent<TextMeshProUGUI>();
+        Image panel =  day.Find("Panel").GetComponent<Image>();
+                
+        panel.color = Color.white;
+        numberText.color = Color.black;
+    }
+    
     public string ToTitleCase(string str)
     {
         return localCultureInfo.TextInfo.ToTitleCase(str.ToLower());

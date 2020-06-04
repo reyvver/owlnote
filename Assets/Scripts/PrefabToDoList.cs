@@ -9,7 +9,9 @@ public class PrefabToDoList : MonoBehaviour
 
     public void OnAddButton()
     {
-        
+        ViewModel.currentKey = listName.text;
+        View.textInputPanel.gameObject.SetActive(true);
+        View.textInputPanel.SetAsLastSibling();
     }
 
     public void OnDeleteButton()

@@ -43,15 +43,7 @@ public class GoogleSignInDemo : MonoBehaviour
     public void SignInWithGoogle() { OnSignIn(); }
     public void SignOutFromGoogle() { OnSignOut(); }
 
-    private void OnSignIn()
-    {
-        GoogleSignIn.Configuration = configuration;
-        GoogleSignIn.Configuration.UseGameSignIn = false;
-        GoogleSignIn.Configuration.RequestIdToken = true;
-        AddToInformation("Calling SignIn");
 
-        GoogleSignIn.DefaultInstance.SignIn().ContinueWith(OnAuthenticationFinished);
-    }
 
     private void OnSignOut()
     {
@@ -113,6 +105,16 @@ public class GoogleSignInDemo : MonoBehaviour
                 AddToInformation("Sign In Successful.");
             }
         });
+    }
+    
+    private void OnSignIn()
+    {
+        GoogleSignIn.Configuration = configuration;
+        GoogleSignIn.Configuration.UseGameSignIn = false;
+        GoogleSignIn.Configuration.RequestIdToken = true;
+        AddToInformation("Calling SignIn");
+
+        GoogleSignIn.DefaultInstance.SignIn().ContinueWith(OnAuthenticationFinished);
     }
 
     public void OnSignInSilently()

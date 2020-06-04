@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public class Prefabs : MonoBehaviour
 {
+    private static Color32 _greyDarkCustom = new Color32(108, 108, 108, 255);
+    
     public static void CreateEvent(GameObject prefab, Transform container, MEvent currentEvent)
     {
         GameObject newObj = Instantiate(prefab, container, false);
@@ -68,8 +70,8 @@ public class Prefabs : MonoBehaviour
         GameObject newObj = Instantiate(prefab, container, false);
         Transform currentObject = newObj.transform;
         
-        Transform label = currentObject.GetChild(1);
-        Transform key = currentObject.GetChild(3);
+        Transform label = currentObject.GetChild(0);
+        Transform key = currentObject.GetChild(1);
 
         label.GetComponent<TextMeshProUGUI>().text = value;
         key.GetComponent<TextMeshProUGUI>().text = index;
@@ -93,19 +95,16 @@ public class Prefabs : MonoBehaviour
         Transform label = currentObject.GetChild(1);
         Toggle checkmark = currentObject.GetComponent<Toggle>();
         checkmark.isOn = check;
+
+       if (check)
+        {
+            checkmark.interactable = false;
+            label.GetComponent<TextMeshProUGUI>().color = _greyDarkCustom;
+            Transform deleteButton = currentObject.Find("DeleteButton/Image");
+            deleteButton.gameObject.SetActive(false);
+        }
+
         label.GetComponent<TextMeshProUGUI>().text = value;
     }
     
-    /*
-    public static void CreateTodo(GameObject prefab, Transform container, string value, string index)
-    {
-        GameObject newObj = Instantiate(prefab, container, false);
-        Transform currentObject = newObj.transform;
-        
-        Transform label = currentObject.GetChild(1);
-        Transform key = currentObject.GetChild(2);
-
-        label.GetComponent<TextMeshProUGUI>().text = value;
-        key.GetComponent<TextMeshProUGUI>().text = index;
-    }*/
 }

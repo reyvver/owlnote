@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using TMPro;
 
 public class PrefabToDoObjects : MonoBehaviour
@@ -9,7 +7,6 @@ public class PrefabToDoObjects : MonoBehaviour
     
     public void OnDeleteButton()
     {
-        Debug.Log("нажали");
         ViewModel.DeleteToDoObject(key.text);
     }
 

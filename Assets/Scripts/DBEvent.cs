@@ -1,18 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Firebase;
 using Firebase.Auth;
 using Firebase.Database;
 using Firebase.Unity.Editor;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 
 public class DBEvent : MonoBehaviour
 {
-    private  Dictionary<string, List<MEvent>> eventsValues = new Dictionary<string, List<MEvent>>();
+    private Dictionary<string, List<MEvent>> eventsValues = new Dictionary<string, List<MEvent>>();
     private static DatabaseReference _reference;
-    
+
     public class EventClass
     {
         public string title, endTime, categoryName, categoryColour, description;
@@ -26,22 +24,21 @@ public class DBEvent : MonoBehaviour
             description = details;
         }
     }
-    
+
 
     private void Start()
     {
         InitializeDatabase();
     }
-    
+
     private void InitializeDatabase()
     {
         FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://owlnote-dragunovatv.firebaseio.com/");
-        _reference = FirebaseDatabase.DefaultInstance.GetReference("/calendar/" + FirebaseAuth.DefaultInstance.CurrentUser.UserId);
+        _reference = FirebaseDatabase.DefaultInstance.GetReference(
+                "/calendar/" + FirebaseAuth.DefaultInstance.CurrentUser.UserId);
         _reference.ValueChanged += HandleValueChanged;
         Debug.Log("done events");
     }
-
-
 
     private void OnDestroy()
     {
@@ -66,7 +63,7 @@ public class DBEvent : MonoBehaviour
         eventsValues.Clear();
 
         DataSnapshot snapshot = args.Snapshot;
-        
+
 
         foreach (DataSnapshot childDataSnapshot in snapshot.Children)
         {
@@ -96,48 +93,49 @@ public class DBEvent : MonoBehaviour
                     }
                 }
         }
+
         ViewModel.SetEventsValues(eventsValues);
     }
 
-   public  static void DBEventDelete(string date, string key)
+    public static void DBEventDelete(string date, string key)
     {
         string dateEvent = ReplaceWith(date);
         _reference.Child(dateEvent).Child(key).RemoveValueAsync();
     }
 
-   public  static void DBEventAdd(string date, Dictionary<string, string> newEvent)
+    public static void DBEventAdd(string date, Dictionary<string, string> newEvent)
     {
         string dateEvent = ReplaceWith(date);
         string key = newEvent["startTime"];
         newEvent.Remove("startTime");
-        
+
         string json = JsonUtility.ToJson(ToCurrentClass(newEvent));
         _reference.Child(dateEvent).Child(key).SetRawJsonValueAsync(json);
     }
 
-   private static EventClass ToCurrentClass(Dictionary<string, string> values)
-   {
-       string title = values["title"];
-       string categoryName = values["categoryName"];
-       string categoryColour = values["categoryColour"];
-       string endTime = values["endTime"];
-       string description = "";
-       if (values.ContainsKey("description"))
-       {
-           description = values["description"];
-       }
+    private static EventClass ToCurrentClass(Dictionary<string, string> values)
+    {
+        string title = values["title"];
+        string categoryName = values["categoryName"];
+        string categoryColour = values["categoryColour"];
+        string endTime = values["endTime"];
+        string description = "";
+        if (values.ContainsKey("description"))
+        {
+            description = values["description"];
+        }
 
-       EventClass newEvent = new EventClass(title, endTime, categoryName, categoryColour, description);
-       return newEvent;
-   }
+        EventClass newEvent = new EventClass(title, endTime, categoryName, categoryColour, description);
+        return newEvent;
+    }
 
 
-   public  static  void DBUpdate(string date, MEvent updatedEvent)
+    public static void DBUpdate(string date, MEvent updatedEvent)
     {
     }
-   
 
-   private static string ReplaceWith(string str)
+
+    private static string ReplaceWith(string str)
     {
         string result = "";
 
@@ -145,6 +143,6 @@ public class DBEvent : MonoBehaviour
 
         return result;
     }
-    
-    
+
+
 }

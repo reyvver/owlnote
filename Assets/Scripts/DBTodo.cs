@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Firebase.Auth;
 using Firebase.Database;
 using UnityEngine;
@@ -7,7 +8,6 @@ public class DBTodo : MonoBehaviour
 {
     private static Dictionary<string, List<MTodo>> todoValues = new Dictionary<string, List<MTodo>>();
     private static DatabaseReference _reference;
-    
 
     private void Start()
     {
@@ -59,14 +59,12 @@ public class DBTodo : MonoBehaviour
                     
                     string listName = list.Key;
                     currentList.nameList = listName;
-                    currentList.itemsList = new Dictionary<string, string>();
+                    currentList.itemsList = new Dictionary<string, bool>();
 
                     foreach (DataSnapshot item in childDataSnapshot.Child(listName).Children)
                     {
                         string name = item.Key;
-                        string status = item.Value.ToString();
-                        
-                        Debug.Log(name + " "+status);
+                        bool status = Convert.ToBoolean(item.Value);
                         currentList.itemsList.Add(name,status);
                     }
                     
@@ -104,19 +102,36 @@ public class DBTodo : MonoBehaviour
 
     public static void DeleteList(string date,string listName)
     {
-        string dateNote = ReplaceWith(date);
-        _reference.Child(dateNote).Child(listName).RemoveValueAsync();
+        string dateTodo = ReplaceWith(date);
+        _reference.Child(dateTodo).Child(listName).RemoveValueAsync();
+    }
+    public static void DeleteListItem(string date,string listName,string itemName)
+    {
+        string dateTodo = ReplaceWith(date);
+        _reference.Child(dateTodo).Child(listName).Child(itemName).RemoveValueAsync();
     }
 
-    public static void AddList(string date, string listName)
+    public static void UpdateItemState(string date,string listName,string itemName)
     {
-        
+        string dateTodo = ReplaceWith(date);
+        _reference.Child(dateTodo).Child(listName).Child(itemName).SetValueAsync(true);
+    }
+
+    public static void AddList(string date, MTodo list)
+    {
+        string dateTodo = ReplaceWith(date);
+        string listName = list.nameList;
+
+        foreach (var item in list.itemsList)
+        {
+            _reference.Child(dateTodo).Child(listName).Child(item.Key).SetValueAsync(item.Value);
+        }
     }
 
     public static void AddItemInList(string date, string listName, string newItem)
     {
-        string dateNote = ReplaceWith(date);
-        _reference.Child(dateNote).Child(listName).Child(newItem).SetValueAsync("false");
+        string dateTodo = ReplaceWith(date);
+        _reference.Child(dateTodo).Child(listName).Child(newItem).SetValueAsync("false");
     }
 
     private static string ReplaceWith(string str)
@@ -127,4 +142,5 @@ public class DBTodo : MonoBehaviour
 
         return result;
     }
+
 }

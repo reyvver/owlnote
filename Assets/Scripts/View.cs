@@ -35,6 +35,7 @@ public class View : MonoBehaviour
     public GameObject SelectTimePanel;
     public GameObject EmailVerifyPanel;
     public GameObject UpdateNotePanel;
+    public GameObject TextInputPanel;
     
     public TMP_InputField dateSelected;
     public Transform DatePlatesContainer;
@@ -46,18 +47,19 @@ public class View : MonoBehaviour
     private ScrollRectScript time;
     private string dateCurrent;
     private static string typeObject;
-    private static string currentKey;
+
     private bool _importantOperation;
-    private static GameObject deletePanel;
+    private static Transform deletePanel;
     private TextMeshProUGUI successText;
 
     private GameObject currentTimeSelection;
     private static GameObject noteUpdate;
  
     public static TMP_InputField noteUpdateText;
+    public static Transform textInputPanel;
     
     private List<int> NumberOfDaysInMonths = new List<int>(); // дни в месяце
-    private string[] DaysToString = new[] {"ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"};
+    private string[] DaysToString = {"ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"};
     public  List<GameObject> OpenedPanels;
     private CultureInfo localCultureInfo = new CultureInfo("ru-RU");
 
@@ -68,11 +70,6 @@ public class View : MonoBehaviour
     [NonSerialized] public TextMeshProUGUI eventStart, eventEnd, errorEventLabel, eventCategory;
     [NonSerialized] public TMP_InputField eventTitle, eventDescription;
     [NonSerialized] public TextMeshProUGUI todayMonth, todayDayOfWeek;
-
-    private Color32 _greyLightCustom = new Color32(245, 245, 245, 255);
-    private Color32 _greyDarkCustom = new Color32(108, 108, 108, 255);
-    private Color32 _purpleCustom = new Color32(146, 96, 255, 255);
-
 
     private void Awake()
     {
@@ -106,7 +103,8 @@ public class View : MonoBehaviour
     {
         dateCurrent = DateTime.Today.ToString("dd/MM/yyyy", localCultureInfo);
         dateSelected.text = dateCurrent;
-        deletePanel = DeleteConfirmPanel;
+        deletePanel = DeleteConfirmPanel.transform;
+        textInputPanel = TextInputPanel.transform;
         time = TimePicker.GetComponent<ScrollRectScript>();
 
         successText = PanelSuccessfulOperation.Find("PanelSuccess/TextMessage").GetComponent<TextMeshProUGUI>();
@@ -133,6 +131,8 @@ public class View : MonoBehaviour
         noteUpdate = UpdateNotePanel;
         noteUpdateText = UpdateNotePanel.transform.Find("Panel/NoteText").GetComponent<TMP_InputField>();
 
+
+
         InitialiseDatesPlates(); //инициализируем панель для быстрого выбора даты
         ShowSelectedDatePanel(DatePlatesContainer.GetChild(0)); // сегодняшняя дата
     }
@@ -140,15 +140,18 @@ public class View : MonoBehaviour
     private void Update()
     {
         if (!Input.GetKeyDown(KeyCode.Escape)) return;
+        
+        if (DeleteConfirmPanel.active)
+        {
+            DeleteConfirmPanel.SetActive(false);
+        }
+        if (TextInputPanel.active)
+        {
+            TextInputPanel.SetActive(false);
+        }
         if (OpenedPanels.Count > 0)
         {
             int lastPanelIndex = OpenedPanels.Count - 1;
-
-            if (DeleteConfirmPanel.active)
-            {
-                DeleteConfirmPanel.SetActive(false);
-            }
-            else
 
             if (OpenedPanels[lastPanelIndex] == PanelSuccessfulOperation)
             {
@@ -204,13 +207,13 @@ public class View : MonoBehaviour
 
             if (panel != selectedPanel)
             {
-                backPanel.color = _greyLightCustom;
-                numberText.color = _greyDarkCustom;
-                textText.color = _greyDarkCustom;
+                backPanel.color = InterfaceTheme.GreyLightCustom;
+                numberText.color = InterfaceTheme.GreyDarkCustom;
+                textText.color = InterfaceTheme.GreyDarkCustom;
             }
             else
             {
-                backPanel.color = _purpleCustom;
+                backPanel.color = InterfaceTheme.PurpleCustom;
                 numberText.color = Color.white;
                 textText.color = Color.white;
             }
@@ -341,9 +344,7 @@ public class View : MonoBehaviour
         if (valueNote.text != "")
         {
             ViewModel.AddNewNote(valueNote.text);
-            CloseAll();
-            successText.text = "Добавлена новая заметка";
-            OpenPanel(PanelSuccessfulOperation.gameObject);
+            ShowSuccessOperation("Добавлена новая заметка");
             valueNote.text = "";
         }
     }
@@ -361,9 +362,7 @@ public class View : MonoBehaviour
                 values.Add("description", eventDescription.text);
             
             ViewModel.AddNewEvent(values);
-            CloseAll();
-            successText.text = "Добавлен пункт расписания";
-            OpenPanel(PanelSuccessfulOperation.gameObject);
+            ShowSuccessOperation("Добавлен пункт расписания");
             ClearEventInfo();
         }
         else
@@ -376,10 +375,9 @@ public class View : MonoBehaviour
         typeObject = type;
         
         deletePanel.gameObject.SetActive(true);
-        deletePanel.transform.SetAsLastSibling();
+        deletePanel.SetAsLastSibling();
         
         UpdateDeleteMessage(key.text);
-        currentKey = key.text;
     }
     private static void UpdateDeleteMessage(string title)
     {
@@ -434,7 +432,7 @@ public class View : MonoBehaviour
                 break;
             }
         }
-        DeleteConfirmPanel.gameObject.SetActive(false);
+        DeleteConfirmPanel.SetActive(false);
         DeleteConfirmPanel.transform.SetAsFirstSibling();
     }
 
@@ -510,8 +508,50 @@ public class View : MonoBehaviour
     {
         string value = input.text;
 
-        if (value == "") value = "По умолчанию";
-        ViewModel.AddTodoObject(value);
-        input.text = "";
+        if (value != "")
+        {
+            ViewModel.AddTodoObject(value);
+            input.text = "";
+        }
+    }
+
+    public void OnButtonAdmitTextInput(TMP_InputField value)
+    {
+        ViewModel.AddTodo(value.text);
+        value.text = "";
+        TextInputPanel.SetActive(false);
+    }
+
+    private void ShowSuccessOperation(string message)
+    {
+        CloseAll();
+        successText.text = message;
+        OpenPanel(PanelSuccessfulOperation.gameObject);
+    }
+
+    public void AddNewList(Transform ObjectsSection)
+    {
+        string newListName = ObjectsSection.parent.Find("TitleSection/TitleInput").GetComponent<TMP_InputField>().text;
+
+        Transform items = ObjectsSection.Find("Scroll view/Viewport/ContentTodoObjects");
+        if (newListName != "" && items.childCount > 0)
+        {
+            Dictionary<string, bool> newListItems = new Dictionary<string, bool>();
+
+            foreach (Transform item in items)
+            {
+                string title = item.GetChild(0).GetComponent<TextMeshProUGUI>().text;
+                newListItems.Add(title, false);
+            }
+
+            MTodo newList = new MTodo
+            {
+                nameList = newListName,
+                itemsList = newListItems
+            };
+
+            ViewModel.AddList(newList);
+            ShowSuccessOperation("Добавлен новый список дел");
+        }
     }
 }
