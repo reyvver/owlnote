@@ -60,6 +60,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -85,7 +86,6 @@ GameObject:
   - component: {fileID: 8049217596009514629}
   - component: {fileID: 8049217596009514630}
   - component: {fileID: 8049217596009514628}
-  - component: {fileID: 7574067042562036418}
   m_Layer: 5
   m_Name: ButtonSettings
   m_TagString: Untagged
@@ -136,6 +136,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -192,16 +193,3 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &7574067042562036418
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8049217596009514624}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e0aa53e7f81f81846a9e962983918105, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  PreviousScene: 1

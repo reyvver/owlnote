@@ -24,6 +24,9 @@ public class PrefabToDo : MonoBehaviour
    public void OnChangeState()
    {
        if (checkmark == true)
-        ViewModel.UpdateItemState(itemName.text);
+       {
+           ViewModel.currentKey = listName.text;
+           ViewModel.UpdateItemState(itemName.text);
+       }
    }
 }

@@ -148,6 +148,7 @@ public class UserAuthAndRegistryScript : MonoBehaviour
     if (emailA != "" && passwordA != "")
     {
       errorTextAuth.text = "";
+      Debug.Log(emailA+"  "+ passwordA);
       Auth.SignInWithEmailAndPasswordAsync(emailA, passwordA).ContinueWith(HandleSigninResult);
     }
     else

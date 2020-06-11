@@ -1,24 +1,32 @@
 ﻿using System;
+using System.CodeDom;
+using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using DG.Tweening;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
+using UnityEngine.UI.Extensions;
 
 public class ViewModel : MonoBehaviour
 {
-    public static Transform EventsContainer, NotesContainer, CategoriesContainer, ToDoObjectsContainer, ToDoContainer;
+    public static Transform Containter,EventsContainer, NotesContainer, CategoriesContainer, ToDoObjectsContainer, ToDoContainer, AllContainer;
 
     public static GameObject EventsHeader, NotesHeader, ToDoHeader;
 
-    public static GameObject EventPrefab, NotePrefab, CategoryPrefab, ToDoObjectPrefab, ToDoItemPrefab,  TodoListPrefab;
+    public static GameObject EventPrefab, NotePrefab, CategoryPrefab, ToDoObjectPrefab, ToDoItemPrefab,  TodoListPrefab, AllContainerPrefab;
 
     public static GameObject EmptySchedulePanel;
     public static GameObject EmailVerifyPanel;
     public static TextMeshProUGUI emailVerify;
-
+    public static TMP_Dropdown categorySelect, showTypeSelect;
+    
     public static string dateSelected;
     public static string selectedCategoryName, selectedCategoryColour, currentKey;
-    
+
+    private static ScrollRect scrollContent;
     
     private static Dictionary<string, List<MEvent>> eventsValues = new Dictionary<string, List<MEvent>>();
     private static Dictionary<string, List<MEvent>> EventsValues
@@ -70,7 +78,15 @@ public class ViewModel : MonoBehaviour
 
 
     private static bool events, notes, lists;
-    
+
+    private void OnDestroy()
+    {
+        EventsValues.Clear();
+        CategoriesValues.Clear();
+        NotesValues.Clear();
+        ToDoValues.Clear();
+        toDoObjectsCount = 0;
+    }
 
     private void Start()
     {
@@ -83,9 +99,14 @@ public class ViewModel : MonoBehaviour
 
         toDoObjectsCount = 0;
 
+        scrollContent = Containter.GetComponent<ScrollRect>();
         emailVerify = EmailVerifyPanel.transform.GetChild(5).GetComponent<TextMeshProUGUI>();
+        
+        categorySelect.ClearOptions();
+        categorySelect.onValueChanged.AddListener(delegate { SelectOption(); });
+        
     }
-
+    
 
     private static string ReplaceWith(string str)
     {
@@ -97,6 +118,9 @@ public class ViewModel : MonoBehaviour
     }
     private static void CheckEmptyTimetable(string type)
     {
+        if(scrollContent!=null)
+            scrollContent.enabled = false;
+
         switch (type)
         {
             case "events":
@@ -128,9 +152,11 @@ public class ViewModel : MonoBehaviour
         {
             EmptySchedulePanel.SetActive(true);
         }
-        else EmptySchedulePanel.SetActive(false);
-        
-        //Canvas.ForceUpdateCanvases();
+        else
+        {
+            EmptySchedulePanel.SetActive(false);
+        }
+
     }
     private static bool CheckCurrentSection(Transform container, GameObject header)
     {
@@ -149,10 +175,19 @@ public class ViewModel : MonoBehaviour
 
         return result;
     }
-    
-    
-    
-    
+
+    private void Update()
+    {
+        if (scrollContent.enabled) return;
+        StartCoroutine(WaitD());
+    }
+
+    IEnumerator WaitD()
+    {
+        yield return new WaitForEndOfFrame();
+        scrollContent.enabled = true;
+    }
+
     public static void SetEventsValues(Dictionary<string, List<MEvent>> newEventsValues)
     {
         EventsValues = newEventsValues;
@@ -169,11 +204,10 @@ public class ViewModel : MonoBehaviour
             List<MEvent> values = EventsValues[currentDate]; //берем выбранный день
             foreach (MEvent currentEvent in values) //для всех событий в этом дне
             {
-                Prefabs.CreateEvent(EventPrefab, EventsContainer, currentEvent);
+                Prefabs.CreateEvent(EventPrefab, EventsContainer, currentEvent, true);
             }
 
         }
-
         CheckEmptyTimetable("events");
     }
     
@@ -187,14 +221,20 @@ public class ViewModel : MonoBehaviour
     {
         DBEvent.DBEventDelete(dateSelected, currentKey);
     }
+
+    public static void ScrollToTheTop()
+    {
+        scrollContent.ScrollToBottom();
+    }
     
-    
+
 
     public static void SetCategoriesValues( Dictionary<string, string> newCategoriesValues)
     {
         ClearContent(CategoriesContainer);
         CategoriesValues = newCategoriesValues;
         ShowCategories();
+        FillCategorySelect();
     }
     private static void ShowCategories()
     {
@@ -241,7 +281,7 @@ public class ViewModel : MonoBehaviour
             List<MNote> values = NotesValues[currentDate]; //берем выбранный день
             foreach (MNote currentNote in values) //для всех событий в этом дне
             {
-                Prefabs.CreateNote(NotePrefab, NotesContainer, currentNote);
+                Prefabs.CreateNote(NotePrefab, NotesContainer, currentNote, true);
             }
         }
  
@@ -298,7 +338,7 @@ public class ViewModel : MonoBehaviour
                 
         string currentDate = ReplaceWith(dateSelected);
         
-       if (ToDoValues.ContainsKey(currentDate))
+        if (ToDoValues.ContainsKey(currentDate))
         {
             List<MTodo> values = ToDoValues[currentDate];
 
@@ -306,19 +346,17 @@ public class ViewModel : MonoBehaviour
             {
                 string listName = currentList.nameList;
 
-                Transform listContainer = Prefabs.CreateTodo(TodoListPrefab, ToDoContainer, listName);
+                Transform listContainer = Prefabs.CreateTodo(TodoListPrefab, ToDoContainer, listName, true);
 
                 var items = currentList.itemsList.OrderBy(o => o.Value);
 
                 foreach (var item in items)
                 {
-                    Prefabs.CreateTodoItem(ToDoItemPrefab, listContainer, item.Key, Convert.ToBoolean(item.Value));
+                    Prefabs.CreateTodoItem(ToDoItemPrefab, listContainer, item.Key, Convert.ToBoolean(item.Value),true);
                 }
             }
         }
-
         CheckEmptyTimetable("lists");
-        
     }
 
     public static void AddTodo(string value)
@@ -346,6 +384,189 @@ public class ViewModel : MonoBehaviour
         DBTodo.AddList(dateSelected,newList);
     }
 
+    public static void ShowAllEvents()
+    { 
+        ClearContent(AllContainer);
+
+        foreach (var Item in EventsValues)
+        {
+            string date = ReplaceWith(Item.Key);
+
+            Transform currentContent = Prefabs.CreateAllPrefab(AllContainerPrefab, AllContainer, date);
+
+            foreach (MEvent currentEvent in Item.Value)
+            {
+                Prefabs.CreateEvent(EventPrefab, currentContent, currentEvent, false);
+            }
+        }
+        
+    }
+    
+    public static void ShowAllNotes()
+    {
+        ClearContent(AllContainer);
+
+        foreach (var Item in NotesValues)
+        {
+            string date = ReplaceWith(Item.Key);
+          
+            Transform currentContent = Prefabs.CreateAllPrefab(AllContainerPrefab, AllContainer, date);
+
+            foreach (MNote currentNote in Item.Value)
+            {
+                Prefabs.CreateNote(NotePrefab,currentContent,currentNote,false);
+            }
+        }
+    }
+    
+    public static void ShowAllLists()
+    {
+        ClearContent(AllContainer);
+
+        foreach (var Item in ToDoValues)
+        {
+            string date = ReplaceWith(Item.Key);
+            Transform currentContent = Prefabs.CreateAllPrefab(AllContainerPrefab, AllContainer, date);
+
+            foreach (MTodo currentList in  Item.Value)
+            {
+                string listName = currentList.nameList;
+
+                Transform listContainer = Prefabs.CreateTodo(TodoListPrefab, currentContent, listName, false);
+
+                var items = currentList.itemsList.OrderBy(o => o.Value);
+
+                foreach (var item in items)
+                {
+                    Prefabs.CreateTodoItem(ToDoItemPrefab, listContainer, item.Key, Convert.ToBoolean(item.Value),false);
+                }
+            }
+
+        }
+    }
+
+    public static void ClearAllContainer()
+    {
+        ClearContent(AllContainer);
+    }
+
+    public static void FillCategorySelect()
+    {
+        categorySelect.ClearOptions();
+        List<string> values = new List<string>();
+
+        foreach (var category in categoriesValues)
+        {
+            values.Add(category.Key);
+        }
+        categorySelect.AddOptions(values);
+    }
+
+    private void SelectOption()
+    {
+        TMP_Text currentOption = categorySelect.captionText;
+        string textOption = currentOption.text;
+        string newColor = "";
+
+        Debug.Log(textOption);
+        
+        foreach (var category in categoriesValues)
+        {
+            if (textOption == category.Key)
+            {
+                newColor = category.Value;
+                break;
+            }
+        }
+        
+        if (ColorUtility.TryParseHtmlString(newColor, out var newCol))
+        {
+           currentOption.color = newCol;
+        }
+    }
+
+    public static void ShowSelectedEvents()
+    {
+        ClearContent(AllContainer);
+
+        foreach (var Item in EventsValues)
+        {
+            string date = ReplaceWith(Item.Key);
+
+            Transform currentContent = Prefabs.CreateAllPrefab(AllContainerPrefab, AllContainer, date);
+
+            foreach (MEvent currentEvent in Item.Value)
+            {
+                if(currentEvent.CategoryName == categorySelect.captionText.text)
+                    Prefabs.CreateEvent(EventPrefab, currentContent, currentEvent, false);
+            }
+
+            if (currentContent.childCount == 0)
+            {
+                currentContent.parent.SetParent(null);
+                Destroy(currentContent.parent.gameObject);
+            }
+        }
+    }
 
 
+    public static void ChangeShowType(string type)
+    {
+        string resultType = "";
+        
+        switch (type)
+        {
+            case "События":
+            {
+                resultType = "event";
+                break;   
+            }
+            case "Заметки":
+            {
+                resultType = "note";
+                break;
+            }
+            case "Списки дел":
+            {
+                resultType = "list";
+                break;
+            }
+        }
+        
+        DBUser.ChangeShowType(resultType);
+    }
+
+    public static void ChangeContainersOrder(string type)
+    {
+        switch (type)
+        {
+            case "event":
+            {
+                EventsContainer.SetAsFirstSibling();
+                EventsHeader.transform.SetAsFirstSibling();
+                ToDoHeader.transform.SetAsLastSibling();
+                ToDoContainer.SetAsLastSibling();
+                showTypeSelect.value = 0;
+                break;   
+            }
+            case "note":
+            {
+                NotesContainer.SetAsFirstSibling();
+                NotesHeader.transform.SetAsFirstSibling();
+                ToDoHeader.transform.SetAsLastSibling();
+                ToDoContainer.SetAsLastSibling();
+                showTypeSelect.value = 1;
+                break;
+            }
+            case "list":
+            {
+                ToDoContainer.SetAsFirstSibling();
+                ToDoHeader.transform.SetAsFirstSibling();
+                NotesHeader.transform.SetAsLastSibling();
+                NotesContainer.SetAsLastSibling();
+                showTypeSelect.value = 2;
+                break;
+            }
+        }
+    }
 }

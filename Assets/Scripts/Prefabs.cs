@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Diagnostics.Contracts;
+using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
@@ -6,7 +7,7 @@ public class Prefabs : MonoBehaviour
 {
     private static Color32 _greyDarkCustom = new Color32(108, 108, 108, 255);
     
-    public static void CreateEvent(GameObject prefab, Transform container, MEvent currentEvent)
+    public static void CreateEvent(GameObject prefab, Transform container, MEvent currentEvent, bool interactable)
     {
         GameObject newObj = Instantiate(prefab, container, false);
         Transform currentObject = newObj.transform;
@@ -34,6 +35,9 @@ public class Prefabs : MonoBehaviour
         {
             colorObj.GetComponent<Image>().color = newCol;
         }
+        
+        if (!interactable)
+            mainContent.Find("ButtonsPanel").gameObject.SetActive(false);
     }
     
     public static void CreateCategory(GameObject prefab, Transform container, string name, string colour)
@@ -53,7 +57,7 @@ public class Prefabs : MonoBehaviour
         }
     }
 
-    public static void CreateNote(GameObject prefab, Transform container, MNote currentNote)
+    public static void CreateNote(GameObject prefab, Transform container, MNote currentNote, bool interactable)
     {
         GameObject newObj = Instantiate(prefab, container, false);
         Transform currentObject = newObj.transform;
@@ -63,6 +67,12 @@ public class Prefabs : MonoBehaviour
 
         key.GetComponent<TextMeshProUGUI>().text = currentNote.key;
         value.GetComponent<TextMeshProUGUI>().text = currentNote.value;
+
+        if (!interactable)
+        {
+            currentObject.Find("ButtonsPanel").gameObject.SetActive(false);
+            currentObject.Find("TextContainer").GetComponent<Image>().color = InterfaceTheme.GreVeryLightCustom;
+        }
     }
 
     public static void CreateTodoObject(GameObject prefab, Transform container, string value, string index)
@@ -77,7 +87,7 @@ public class Prefabs : MonoBehaviour
         key.GetComponent<TextMeshProUGUI>().text = index;
     }
     
-    public static Transform CreateTodo(GameObject prefab, Transform container, string name)
+    public static Transform CreateTodo(GameObject prefab, Transform container, string name, bool interactable)
     {
         GameObject newObj = Instantiate(prefab, container, false);
         Transform currentObject = newObj.transform;
@@ -85,26 +95,48 @@ public class Prefabs : MonoBehaviour
         Transform label = currentObject.Find("PanelHeaderTodo/Title");
         label.GetComponent<TextMeshProUGUI>().text = name;
 
+        if (!interactable)
+        {
+            currentObject.Find("PanelAdd").gameObject.SetActive(false);
+            currentObject.Find("PanelHeaderTodo/PanelDelete").gameObject.SetActive(false);
+        }
+
         return currentObject.GetChild(1);
     }
     
-    public static void CreateTodoItem(GameObject prefab, Transform container, string value, bool check)
+    public static void CreateTodoItem(GameObject prefab, Transform container, string value, bool check, bool interactable)
     {
         GameObject newObj = Instantiate(prefab, container, false);
         Transform currentObject = newObj.transform;
         Transform label = currentObject.GetChild(1);
         Toggle checkmark = currentObject.GetComponent<Toggle>();
+        Transform deleteButton = currentObject.Find("DeleteButton/Image");
         checkmark.isOn = check;
 
        if (check)
         {
             checkmark.interactable = false;
             label.GetComponent<TextMeshProUGUI>().color = _greyDarkCustom;
-            Transform deleteButton = currentObject.Find("DeleteButton/Image");
             deleteButton.gameObject.SetActive(false);
         }
 
+       if (!interactable)
+       {
+           checkmark.interactable = false;
+           deleteButton.gameObject.SetActive(false);
+       }
+       
         label.GetComponent<TextMeshProUGUI>().text = value;
     }
     
+    public static Transform CreateAllPrefab(GameObject prefab, Transform container, string name)
+    {
+        GameObject newObj = Instantiate(prefab, container, false);
+        Transform currentObject = newObj.transform;
+
+        Transform date = currentObject.Find("PanelHeader/Date");
+        date.GetComponent<TextMeshProUGUI>().text = name;
+        
+        return currentObject.GetChild(1);
+    }
 }

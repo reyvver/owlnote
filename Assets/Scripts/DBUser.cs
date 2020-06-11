@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Firebase;
 using Firebase.Auth;
+using Firebase.Database;
 using UnityEngine.SceneManagement;
 using TMPro;
 
@@ -15,7 +16,7 @@ public class DBUser : MonoBehaviour
     public Transform PanelUserOperation;
     public TMP_InputField newPassword;
     public TMP_InputField verifyPassword;
-
+  //  public static string userShowType;
     public List<TMP_InputField> inputs;
     private  FirebaseUser currentUser;
     
@@ -24,12 +25,46 @@ public class DBUser : MonoBehaviour
     private TextMeshProUGUI textSuccess;
     private static bool _reauthenticate;
     
+    private static DatabaseReference _reference;
+    
+    
     // Start is called before the first frame update
     void Start()
     {
         currentUser = FirebaseAuth.DefaultInstance.CurrentUser;
         textSuccess = PanelUserOperation.GetChild(1).GetComponent<TextMeshProUGUI>();
         ReloadUser();
+        InitializeDatabase();
+    }
+    
+    private void InitializeDatabase()
+    {
+        _reference = FirebaseDatabase.DefaultInstance.GetReference("/settings/" + FirebaseAuth.DefaultInstance.CurrentUser.UserId);
+        _reference.ValueChanged += HandleValueChanged;
+        Debug.Log("done user");
+    }
+
+    private void HandleValueChanged(object sender, ValueChangedEventArgs args)
+    {
+        if (args.DatabaseError != null)
+        {
+            Debug.LogError(args.DatabaseError.Message);
+            return;
+        }
+        
+        DataSnapshot snapshot = args.Snapshot;
+        
+        if (snapshot.ChildrenCount > 0)
+        {
+            string userShowType = snapshot.Child("showType").Value.ToString();
+            ViewModel.ChangeContainersOrder(userShowType);
+        }
+        else
+            if (snapshot.ChildrenCount == 0)
+            {
+                AddDefaultSetting();
+            }
+
     }
 
     // Update is called once per frame
@@ -91,6 +126,15 @@ public class DBUser : MonoBehaviour
 
     }
 
+    private void AddDefaultSetting()
+    {
+        _reference.Child("showType").SetValueAsync("event");
+    }
+
+    public static void ChangeShowType(string newValue)
+    {
+        _reference.Child("showType").SetValueAsync(newValue);
+    }
 
 
 

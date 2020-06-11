@@ -1,19 +1,24 @@
 ﻿using System;
+using System.Collections;
 using System.Globalization;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using DG.Tweening;
+
 
 public class View : MonoBehaviour
 {
     [Header("Containers, where items will be shown")]
+    public Transform Container;
     public Transform EventsContainer;
     public Transform NotesContainer;
     public Transform CategoriesContainer;
     public Transform ToDoObjectsContainer;
     public Transform ToDoContainer;
+    public Transform AllContainer;
 
     [Header("Headers of containers")] 
     public GameObject EventsHeader;
@@ -27,6 +32,7 @@ public class View : MonoBehaviour
     public GameObject ToDoObjectPrefab;
     public GameObject ToDoListPrefab;
     public GameObject ToDoItemPrefab;
+    public GameObject AllPrefab;
 
     [Header("UI elements")] 
     public GameObject EmptySchedulePanel;
@@ -36,40 +42,52 @@ public class View : MonoBehaviour
     public GameObject EmailVerifyPanel;
     public GameObject UpdateNotePanel;
     public GameObject TextInputPanel;
-    
+    public GameObject categorySelect;
+    public GameObject showTypeSelect;
+    public GameObject QuickAddMenu;
     public TMP_InputField dateSelected;
     public Transform DatePlatesContainer;
     public Transform PanelSuccessfulOperation;
     public Transform AddEventPanel;
     public Transform HeaderTitle;
     public Text newCategoryColour;
+    public  List<GameObject> OpenedPanels;
+    
+    public static TMP_InputField noteUpdateText;
+    public static Transform textInputPanel;
 
+    
     private ScrollRectScript time;
-    private string dateCurrent;
+    private string dateCurrent, openedScene;
     private static string typeObject;
 
     private bool _importantOperation;
     private static Transform deletePanel;
     private TextMeshProUGUI successText;
+    
 
     private GameObject currentTimeSelection;
     private static GameObject noteUpdate;
  
-    public static TMP_InputField noteUpdateText;
-    public static Transform textInputPanel;
-    
+
     private List<int> NumberOfDaysInMonths = new List<int>(); // дни в месяце
     private string[] DaysToString = {"ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"};
-    public  List<GameObject> OpenedPanels;
+
     private CultureInfo localCultureInfo = new CultureInfo("ru-RU");
 
     private static Dictionary<string, List<MEvent>> eventsValues = new Dictionary<string, List<MEvent>>();
     private Dictionary<string, string> categoriesValues = new Dictionary<string, string>();
-
+    private RectTransform addNote;
+    private RectTransform addEvent;
+    private RectTransform addList; 
 
     [NonSerialized] public TextMeshProUGUI eventStart, eventEnd, errorEventLabel, eventCategory;
     [NonSerialized] public TMP_InputField eventTitle, eventDescription;
     [NonSerialized] public TextMeshProUGUI todayMonth, todayDayOfWeek;
+    [NonSerialized] public Button ButtonCurrentDay, ButtonCalendar;
+    [NonSerialized] private RectTransform Header, PlusButton, Content;
+    [NonSerialized] public TextMeshProUGUI selectedText, EventText;
+    [NonSerialized] public GameObject ButtonCancelSort, ButtonSort, CategorySortPanel;
 
     private void Awake()
     {
@@ -95,6 +113,11 @@ public class View : MonoBehaviour
         ViewModel.ToDoHeader = ToDoHeader;
         ViewModel.ToDoItemPrefab = ToDoItemPrefab;
         ViewModel.TodoListPrefab = ToDoListPrefab;
+        ViewModel.Containter = Container;
+        ViewModel.AllContainerPrefab = AllPrefab;
+        ViewModel.AllContainer = AllContainer;
+        ViewModel.categorySelect = categorySelect.GetComponent<TMP_Dropdown>();
+        ViewModel.showTypeSelect = showTypeSelect.GetComponent<TMP_Dropdown>();
         
         Debug.Log("done with viewmodel");
     }
@@ -127,12 +150,28 @@ public class View : MonoBehaviour
         todayMonth.text = ToTitleCase(localCultureInfo.DateTimeFormat.GetMonthName(DateTime.Today.Month));
         todayDayOfWeek.text = ToTitleCase(localCultureInfo.DateTimeFormat.GetDayName(DateTime.Today.DayOfWeek));
 
+        ButtonCalendar = QuickAddMenu.transform.parent.Find("Footer/MenuFooter/Calendar").GetComponent<Button>();
+        ButtonCurrentDay =  QuickAddMenu.transform.parent.Find("Footer/MenuFooter/CurrentDay").GetComponent<Button>();
 
         noteUpdate = UpdateNotePanel;
         noteUpdateText = UpdateNotePanel.transform.Find("Panel/NoteText").GetComponent<TMP_InputField>();
 
+        addNote = QuickAddMenu.transform.Find("AddNote").GetComponent<RectTransform>();
+        addEvent = QuickAddMenu.transform.Find("AddEvent").GetComponent<RectTransform>();
+        addList = QuickAddMenu.transform.Find("AddToDo").GetComponent<RectTransform>();
+        
+        Header = QuickAddMenu.transform.parent.Find("Header").GetComponent<RectTransform>();
+        PlusButton = QuickAddMenu.transform.parent.Find("PlusButton").GetComponent<RectTransform>();
+        Content = EmptySchedulePanel.transform.parent.GetComponent<RectTransform>();
 
+        selectedText = PanelSuccessfulOperation.parent.Find("AllInfoPanel/PanelHeader/Events/Text").GetComponent<TextMeshProUGUI>();
+        EventText = selectedText;
 
+        ButtonSort = PanelSuccessfulOperation.parent.Find("AllInfoPanel/ButtonSort").gameObject;
+        ButtonCancelSort = PanelSuccessfulOperation.parent.Find("AllInfoPanel/ButtonCancel").gameObject;
+        CategorySortPanel = PanelSuccessfulOperation.parent.Find("AllInfoPanel/SortByCategory").gameObject;
+        
+        
         InitialiseDatesPlates(); //инициализируем панель для быстрого выбора даты
         ShowSelectedDatePanel(DatePlatesContainer.GetChild(0)); // сегодняшняя дата
     }
@@ -141,19 +180,24 @@ public class View : MonoBehaviour
     {
         if (!Input.GetKeyDown(KeyCode.Escape)) return;
         
-        if (DeleteConfirmPanel.active)
+        if (DeleteConfirmPanel)
         {
             DeleteConfirmPanel.SetActive(false);
         }
-        if (TextInputPanel.active)
+        if (TextInputPanel)
         {
             TextInputPanel.SetActive(false);
         }
         if (OpenedPanels.Count > 0)
         {
-            int lastPanelIndex = OpenedPanels.Count - 1;
+            //int lastPanelIndex = OpenedPanels.Count - 1;
 
-            if (OpenedPanels[lastPanelIndex] == PanelSuccessfulOperation)
+            if (QuickAddMenu)
+            {
+                CloseQuickAddMenu();
+            }
+
+            if (PanelSuccessfulOperation)
             {
                 CloseAll();
             }
@@ -227,9 +271,9 @@ public class View : MonoBehaviour
         ViewModel.ShowNotes();
         ViewModel.ShowTodo();
     }
-    
-    
-    
+
+
+
 
     /*Определяет количество дней в каждом месяце*/
     private void InitializeDays()
@@ -309,18 +353,47 @@ public class View : MonoBehaviour
     }
     public void OpenCurrentDay(GameObject obj)
     {
-        obj.SetActive(true);
+        ButtonCurrentDay.enabled = false;
+        ButtonCalendar.enabled = false;
+        
+        Header.DOAnchorPos(new Vector2(0f,-203), 0.5f);
+        Content.DOAnchorPos(new Vector2(0f,-714f), 1f);
+        StartCoroutine( WaitDo(obj, true,0f));
+        PlusButton.gameObject.SetActive(false);
+        openedScene = "current day";
     }
     public void OpenCalendarPage(GameObject obj)
     {
-        obj.SetActive(false);
+        ButtonCurrentDay.enabled = false;
+        ButtonCalendar.enabled = false;
+        PlusButton.gameObject.SetActive(true);
+        Header.DOAnchorPos(new Vector2(0f,226f), 0.5f);
+        Content.DOAnchorPos(new Vector2(0f,1200f), 0.7f);
+        StartCoroutine( WaitDo(obj, false, 0.45f));
+        openedScene = "calendar";
     }
     public void OpenFirstScene()
     {
         SceneManager.LoadScene(0);
     }
-    
 
+    private IEnumerator WaitDo(GameObject obj, bool show, float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        obj.SetActive(show);
+        yield return new WaitForSeconds(1- duration);
+        ButtonCurrentDay.enabled = true;
+        ButtonCalendar.enabled = true;
+    }
+
+    private IEnumerator ButtonDo(float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        ButtonCurrentDay.enabled = true;
+        ButtonCalendar.enabled = true;
+    }
+
+    
     public void SelectCategory()
     {
         AddEventPanel.GetChild(2).GetChild(1).GetChild(0).GetComponent<TextMeshProUGUI>().text =
@@ -497,7 +570,7 @@ public class View : MonoBehaviour
             case "note":
             {
                 if(noteUpdateText.text!="")
-                ViewModel.UpdateNote(noteUpdateText.text);
+                    ViewModel.UpdateNote(noteUpdateText.text);
                 UpdateNotePanel.SetActive(false);
                 noteUpdateText.text = "";
                 break;
@@ -517,9 +590,16 @@ public class View : MonoBehaviour
 
     public void OnButtonAdmitTextInput(TMP_InputField value)
     {
-        ViewModel.AddTodo(value.text);
-        value.text = "";
-        TextInputPanel.SetActive(false);
+        if (openedScene == "current day")
+        {
+            ViewModel.AddTodo(value.text);
+            value.text = "";
+            TextInputPanel.SetActive(false);
+        }
+        else
+        {
+            TextInputPanel.SetActive(false);
+        }
     }
 
     private void ShowSuccessOperation(string message)
@@ -541,7 +621,8 @@ public class View : MonoBehaviour
             foreach (Transform item in items)
             {
                 string title = item.GetChild(0).GetComponent<TextMeshProUGUI>().text;
-                newListItems.Add(title, false);
+                if (!newListItems.ContainsKey(title))
+                    newListItems.Add(title, false);
             }
 
             MTodo newList = new MTodo
@@ -554,4 +635,118 @@ public class View : MonoBehaviour
             ShowSuccessOperation("Добавлен новый список дел");
         }
     }
+
+    public void ShowSettings(GameObject SettingsPanel)
+    {
+        RectTransform settingPosition = SettingsPanel.GetComponent<RectTransform>();
+        settingPosition.DOAnchorPos(Vector2.zero, 0.4f);
+    }
+    
+    public void ShowAllInfo(GameObject SettingsPanel)
+    {
+        ViewModel.ShowAllEvents();
+        ShowSettings(SettingsPanel);
+    }
+    public void CloseAllInfo(GameObject SettingsPanel)
+    {
+        ViewModel.ClearAllContainer();
+        SetSelectedText();
+        CloseSettings(SettingsPanel);
+    }
+
+    public void CloseSettings(GameObject SettingsPanel)
+    {
+        RectTransform settingPosition = SettingsPanel.GetComponent<RectTransform>();
+        settingPosition.DOAnchorPos(new Vector2(1080,0), 0.4f);
+    }
+
+    public void ShowQuickAddMenu()
+    {
+        OpenPanel(QuickAddMenu);
+        StartCoroutine(AnimationForQuickAddMenu(1, 1, 0.25f));
+    }
+
+    public void CloseQuickAddMenu()
+    {
+        CloseLastPanel();
+        StartCoroutine(AnimationForQuickAddMenu(0, 0,0.05f));
+    }
+
+    IEnumerator AnimationForQuickAddMenu(float x, float y, float duration)
+    {
+        addNote.DOScale(new Vector3(x,y), duration);
+        yield return new WaitForSeconds(0.08f);
+        addEvent.DOScale(new Vector3(x,y), duration);
+        yield return new WaitForSeconds(0.08f);
+        addList.DOScale(new Vector3(x,y), duration);
+    }
+    public void ShowAllEvents(TextMeshProUGUI textLabel)
+    {
+        SelectTab(textLabel);
+        ButtonSort.SetActive(true);
+        ViewModel.ShowAllEvents();
+        StartCoroutine(WaitForSelectTab(textLabel));
+    }
+    public void ShowAllNotes(TextMeshProUGUI textLabel)
+    {
+        SelectTab(textLabel);
+        ButtonSort.SetActive(false);
+        ViewModel.ShowAllNotes();
+        StartCoroutine(WaitForSelectTab(textLabel));
+    }
+    public void ShowAllLists(TextMeshProUGUI textLabel)
+    {
+        SelectTab(textLabel);
+        ButtonSort.SetActive(false);
+        ViewModel.ShowAllLists();
+        StartCoroutine(WaitForSelectTab(textLabel));
+    }
+
+    private void SelectTab(TextMeshProUGUI textLabel)
+    {
+        if (selectedText)
+        {
+            selectedText.color = InterfaceTheme.GreyDarkCustom;
+        }
+
+        selectedText = textLabel;
+        selectedText.color = InterfaceTheme.PurpleCustom;
+        
+        if(ButtonCancelSort)
+            ButtonCancelSort.SetActive(false);
+    }
+
+    private void SetSelectedText()
+    {
+        SelectTab(EventText);
+    }
+
+    public void SortEvents()
+    {
+        ButtonCancelSort.SetActive(true);
+        CategorySortPanel.SetActive(false);
+        ViewModel.ShowSelectedEvents();
+    }
+    
+    public void CancelSort()
+    {
+        ButtonCancelSort.SetActive(false);
+        ViewModel.ShowAllEvents();
+    }
+    
+    IEnumerator WaitForSelectTab(TextMeshProUGUI textLabel)
+    {
+        GameObject tab = textLabel.transform.parent.gameObject;
+        tab.GetComponent<Button>().enabled = false;
+        yield return new WaitForSeconds(1f);
+        tab.GetComponent<Button>().enabled = true;
+    }
+
+    public void ChangeShowType(GameObject dropdown)
+    {
+        string value = dropdown.GetComponent<TMP_Dropdown>().captionText.text;
+        ViewModel.ChangeShowType(value);
+    }
+
+   
 }

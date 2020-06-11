@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 
 public class PrefabEvent : MonoBehaviour
 {
@@ -15,9 +16,17 @@ public class PrefabEvent : MonoBehaviour
 
    public void ShowAdditionalInfo(GameObject AdditionalInfoPanel)
    {
-       Animator animator = AdditionalInfoPanel.GetComponent<Animator>();
-       bool isShown = animator.GetBool("shown");
-       animator.SetBool("shown", !isShown);
+       isShown = !isShown;
+       RectTransform settingPosition = AdditionalInfoPanel.GetComponent<RectTransform>();
+       
+       if (isShown)
+       {
+           settingPosition.DOSizeDelta(new Vector2(785, 570), 0.25f);
+       }
+       else
+       {
+           settingPosition.DOSizeDelta(new Vector2(785, 0), 0.25f);
+       }
    }
 
    private void OnDeleteButton()

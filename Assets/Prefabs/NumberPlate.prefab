@@ -422,7 +422,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 4961112419343824713}
+      - m_Target: {fileID: 0}
         m_MethodName: OnClickPlate
         m_Mode: 1
         m_Arguments:
@@ -674,7 +674,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 515511785520324769}
-  - component: {fileID: 4961112419343824713}
   m_Layer: 5
   m_Name: NumberPlate
   m_TagString: Untagged
@@ -705,16 +704,3 @@ RectTransform:
   m_AnchoredPosition: {x: -41.79999, y: -173.14}
   m_SizeDelta: {x: 120, y: 152.48}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &4961112419343824713
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9069577119823917629}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e573059cb9f7dde439b51b81656ebe0d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  number: {fileID: 3234204018597314455}
