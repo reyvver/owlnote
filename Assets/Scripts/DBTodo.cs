@@ -82,24 +82,6 @@ public class DBTodo : MonoBehaviour
         ViewModel.SetTodoValues(todoValues);
     }
 
-    private void DebugValues()
-    {
-        Debug.Log("мы тут");
-        foreach (var obj in todoValues)
-        {
-            Debug.Log(obj.Key);
-            foreach (var list in obj.Value)
-            {
-                Debug.Log(list.nameList);
-
-                foreach (var item in list.itemsList)
-                {
-                    Debug.Log(item.Key + "  "+item.Value);
-                }
-            }
-        }
-    }
-
     public static void DeleteList(string date,string listName)
     {
         string dateTodo = ReplaceWith(date);

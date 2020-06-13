@@ -66,6 +66,18 @@ public class DBUser : MonoBehaviour
             }
 
     }
+    private void OnDestroy()
+    {
+        try
+        {
+            _reference.ValueChanged -= HandleValueChanged;
+        }
+        catch
+        {
+            Debug.Log("Empty settings");
+        }
+
+    }
 
     // Update is called once per frame
     void Update()

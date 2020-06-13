@@ -12,15 +12,15 @@ using UnityEngine.UI.Extensions;
 
 public class ViewModel : MonoBehaviour
 {
-    public static Transform Containter,EventsContainer, NotesContainer, CategoriesContainer, ToDoObjectsContainer, ToDoContainer, AllContainer;
+    public static Transform Containter,EventsContainer, NotesContainer, CategoriesContainer, ToDoObjectsContainer, ToDoContainer, AllContainer, PlansContainer;
 
     public static GameObject EventsHeader, NotesHeader, ToDoHeader;
 
-    public static GameObject EventPrefab, NotePrefab, CategoryPrefab, ToDoObjectPrefab, ToDoItemPrefab,  TodoListPrefab, AllContainerPrefab;
+    public static GameObject EventPrefab, NotePrefab, CategoryPrefab, ToDoObjectPrefab, ToDoItemPrefab,  TodoListPrefab, PlanItemPrefab, AllContainerPrefab;
 
     public static GameObject EmptySchedulePanel;
     public static GameObject EmailVerifyPanel;
-    public static TextMeshProUGUI emailVerify;
+    public static TextMeshProUGUI emailVerify, EmptyPlans;
     public static TMP_Dropdown categorySelect, showTypeSelect;
     
     public static string dateSelected;
@@ -73,6 +73,16 @@ public class ViewModel : MonoBehaviour
         set
         {
             todoValues = value;
+        }
+    }
+    
+    private static Dictionary<string, List<MPlan>> plansValues = new Dictionary<string, List<MPlan>>();
+    private static Dictionary<string, List<MPlan>> PlansValues
+    {
+        get { return plansValues; }
+        set
+        {
+            plansValues = value;
         }
     }
 
@@ -569,4 +579,54 @@ public class ViewModel : MonoBehaviour
             }
         }
     }
+    
+    public static void SetPlansValues(Dictionary<string, List<MPlan>> newPlansValues)
+    {
+        PlansValues = newPlansValues;
+        ShowPlan();
+    }
+
+    public static void ShowPlan()
+    {
+        ClearContent(PlansContainer);
+        string year = CalendarScene.currentYear.ToString();
+        string month = CalendarScene.currentMonth.ToString();
+        
+        if (PlansValues.ContainsKey(year))
+        {
+            List<MPlan> values = PlansValues[year]; //все планы в году
+
+            MPlan currentPlan = FindCurrentPLan(values, month);
+            
+            if (currentPlan.itemsList != null)
+            {
+                EmptyPlans.gameObject.SetActive(false);
+                
+                var items = currentPlan.itemsList.OrderBy(o => o.Value);
+
+                foreach (var item in items)
+                {
+                    Prefabs.CreateTodoItem(PlanItemPrefab, PlansContainer, item.Key, item.Value, true);
+                }
+            }
+            else EmptyPlans.gameObject.SetActive(true);
+        }
+    }
+
+    private static MPlan FindCurrentPLan(List<MPlan> values, string month)
+    {
+        MPlan plan = new MPlan();
+
+        foreach (MPlan currentPlan in values)
+        {
+            if (currentPlan.month == month)
+            {
+                plan = currentPlan;
+                break;
+            }
+        }
+
+        return plan;
+    }
 }
+

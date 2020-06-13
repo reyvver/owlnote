@@ -9,6 +9,7 @@ public class CalendarScene : MonoBehaviour
 {
     [Header("UI elements")] public Transform TimelinePanel;
     public Transform CalendarPanel;
+    public TextMeshProUGUI EmprtyPlans;
     private List<Transform> weeks = new List<Transform>();
     private TextMeshProUGUI monthText, nextText, previousText, currentYearText;
 
@@ -19,6 +20,11 @@ public class CalendarScene : MonoBehaviour
 
     private CultureInfo localCultureInfo = new CultureInfo("ru-RU");
 
+    void Awake()
+    {
+        ViewModel.EmptyPlans = EmprtyPlans;
+    }
+    
     void Start()
     {
         monthText = TimelinePanel.Find("CurrentMonth/Text").GetComponent<TextMeshProUGUI>();
@@ -108,6 +114,7 @@ public class CalendarScene : MonoBehaviour
 
         UpdateMonthTimeline();
         FillCalendar();
+        ViewModel.ShowPlan();
     }
 
     public void PreviousMonth()
@@ -121,6 +128,7 @@ public class CalendarScene : MonoBehaviour
 
         UpdateMonthTimeline();
         FillCalendar();
+        ViewModel.ShowPlan();
     }
 
     private void UpdateMonthTimeline()
@@ -210,5 +218,24 @@ public class CalendarScene : MonoBehaviour
         FillCalendar();
     }
 
+    public static void AddNewItemInPlan(string value)
+    {
+        string year = currentYear.ToString();
+        string month = currentMonth.ToString();
+        DBPlans.AddItemInPlan(year,month,value);
+    }
 
+    public static void DeleteItemInPlan(string value)
+    {
+        string year = currentYear.ToString();
+        string month = currentMonth.ToString();
+        DBPlans.DeletePLanItem(year,month,value);
+    }
+
+    public static void UpdateItemState(string value, bool status)
+    {
+        string year = currentYear.ToString();
+        string month = currentMonth.ToString();
+        DBPlans.UpdateItemState(year,month,value,status);
+    }
 }

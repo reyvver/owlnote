@@ -19,6 +19,8 @@ public class View : MonoBehaviour
     public Transform ToDoObjectsContainer;
     public Transform ToDoContainer;
     public Transform AllContainer;
+    public Transform PlansContainer;
+
 
     [Header("Headers of containers")] 
     public GameObject EventsHeader;
@@ -33,6 +35,7 @@ public class View : MonoBehaviour
     public GameObject ToDoListPrefab;
     public GameObject ToDoItemPrefab;
     public GameObject AllPrefab;
+    public GameObject PlanItemPrefab;
 
     [Header("UI elements")] 
     public GameObject EmptySchedulePanel;
@@ -118,12 +121,17 @@ public class View : MonoBehaviour
         ViewModel.AllContainer = AllContainer;
         ViewModel.categorySelect = categorySelect.GetComponent<TMP_Dropdown>();
         ViewModel.showTypeSelect = showTypeSelect.GetComponent<TMP_Dropdown>();
+
+        ViewModel.PlanItemPrefab = PlanItemPrefab;
+        ViewModel.PlansContainer = PlansContainer;
         
         Debug.Log("done with viewmodel");
     }
 
     private void Start()
     {
+        openedScene = "current day";
+
         dateCurrent = DateTime.Today.ToString("dd/MM/yyyy", localCultureInfo);
         dateSelected.text = dateCurrent;
         deletePanel = DeleteConfirmPanel.transform;
@@ -171,7 +179,7 @@ public class View : MonoBehaviour
         ButtonCancelSort = PanelSuccessfulOperation.parent.Find("AllInfoPanel/ButtonCancel").gameObject;
         CategorySortPanel = PanelSuccessfulOperation.parent.Find("AllInfoPanel/SortByCategory").gameObject;
         
-        
+        PlusButton.gameObject.SetActive(false);
         InitialiseDatesPlates(); //инициализируем панель для быстрого выбора даты
         ShowSelectedDatePanel(DatePlatesContainer.GetChild(0)); // сегодняшняя дата
     }
@@ -598,6 +606,8 @@ public class View : MonoBehaviour
         }
         else
         {
+            CalendarScene.AddNewItemInPlan(value.text);
+            value.text = "";
             TextInputPanel.SetActive(false);
         }
     }

@@ -115,10 +115,9 @@ public class Prefabs : MonoBehaviour
 
        if (check)
         {
-            checkmark.interactable = false;
             label.GetComponent<TextMeshProUGUI>().color = _greyDarkCustom;
-            deleteButton.gameObject.SetActive(false);
-        }
+        }else {
+           label.GetComponent<TextMeshProUGUI>().color = Color.black; }
 
        if (!interactable)
        {
