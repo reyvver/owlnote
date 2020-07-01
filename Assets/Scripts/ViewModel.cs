@@ -1,14 +1,11 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using DG.Tweening;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
-using UnityEngine.UI.Extensions;
+
 
 public class ViewModel : MonoBehaviour
 {
@@ -22,6 +19,8 @@ public class ViewModel : MonoBehaviour
     public static GameObject EmailVerifyPanel;
     public static TextMeshProUGUI emailVerify, EmptyPlans;
     public static TMP_Dropdown categorySelect, showTypeSelect;
+
+    public static MEvent existEvent;
     
     public static string dateSelected;
     public static string selectedCategoryName, selectedCategoryColour, currentKey;
@@ -89,6 +88,10 @@ public class ViewModel : MonoBehaviour
 
     private static bool events, notes, lists;
 
+    private void Awake()
+    {
+        scrollContent = Containter.GetComponent<ScrollRect>();
+    }
     private void OnDestroy()
     {
         EventsValues.Clear();
@@ -97,7 +100,6 @@ public class ViewModel : MonoBehaviour
         ToDoValues.Clear();
         toDoObjectsCount = 0;
     }
-
     private void Start()
     {
         selectedCategoryName = "По умолчанию";
@@ -109,14 +111,19 @@ public class ViewModel : MonoBehaviour
 
         toDoObjectsCount = 0;
 
-        scrollContent = Containter.GetComponent<ScrollRect>();
+
         emailVerify = EmailVerifyPanel.transform.GetChild(5).GetComponent<TextMeshProUGUI>();
         
         categorySelect.ClearOptions();
         categorySelect.onValueChanged.AddListener(delegate { SelectOption(); });
         
     }
-    
+    private void Update()
+    {
+        if (scrollContent.enabled) return;
+        StartCoroutine(WaitScrollRect());
+    }
+
 
     private static string ReplaceWith(string str)
     {
@@ -185,19 +192,24 @@ public class ViewModel : MonoBehaviour
 
         return result;
     }
-
-    private void Update()
+    private static void ClearContent(Transform content)
     {
-        if (scrollContent.enabled) return;
-        StartCoroutine(WaitD());
+        if(content.childCount > 0)
+            for (var i = content.childCount - 1; i >= 0; i--)
+            {
+                var objectA = content.GetChild(i);
+                objectA.SetParent(null);
+                Destroy(objectA.gameObject);
+            } 
     }
-
-    IEnumerator WaitD()
+    IEnumerator WaitScrollRect()
     {
         yield return new WaitForEndOfFrame();
         scrollContent.enabled = true;
     }
 
+    
+    
     public static void SetEventsValues(Dictionary<string, List<MEvent>> newEventsValues)
     {
         EventsValues = newEventsValues;
@@ -220,21 +232,18 @@ public class ViewModel : MonoBehaviour
         }
         CheckEmptyTimetable("events");
     }
-    
     public static void AddNewEvent(Dictionary<string, string> newEvent)
     {
-        newEvent.Add("categoryColour",selectedCategoryColour);
-        newEvent.Add("categoryName",selectedCategoryName);
-        DBEvent.DBEventAdd(dateSelected, newEvent);
+        if (!newEvent.ContainsKey("categoryColour"))
+        {
+            newEvent.Add("categoryColour", selectedCategoryColour);
+            newEvent.Add("categoryName", selectedCategoryName);
+        }
+         DBEvent.DBEventAdd(dateSelected, newEvent);
     }
     public static void DeleteEvent()
     {
         DBEvent.DBEventDelete(dateSelected, currentKey);
-    }
-
-    public static void ScrollToTheTop()
-    {
-        scrollContent.ScrollToBottom();
     }
     
 
@@ -252,6 +261,19 @@ public class ViewModel : MonoBehaviour
         {
             Prefabs.CreateCategory(CategoryPrefab, CategoriesContainer, category.Key, category.Value);
         }
+
+        ShowDefaultCategory("По умолчанию");
+    }
+    public static void ShowDefaultCategory(string name)
+    {
+        foreach (Transform category in CategoriesContainer)
+        {
+            string categoryName = category.GetChild(1).GetComponent<TextMeshProUGUI>().text;
+            if (categoryName == name)
+            {
+                category.SetAsFirstSibling();;
+            }
+        }
     }
     public static void AddNewCategory(string [] values)
     {
@@ -262,16 +284,7 @@ public class ViewModel : MonoBehaviour
         DBCategory.DBCategoryDelete(currentKey);
     }
     
-    private static void ClearContent(Transform content)
-    {
-        if(content.childCount > 0)
-            for (var i = content.childCount - 1; i >= 0; i--)
-            {
-                var objectA = content.GetChild(i);
-                objectA.SetParent(null);
-                Destroy(objectA.gameObject);
-            } 
-    }
+   
 
  
  
@@ -322,7 +335,8 @@ public class ViewModel : MonoBehaviour
     public static void AddTodoObject(string value)
     {
         toDoObjectsCount++;
-        toDoObjects.Add(toDoObjectsCount.ToString(),value);
+        if (!toDoObjects.ContainsKey(toDoObjectsCount.ToString()))
+           toDoObjects.Add(toDoObjectsCount.ToString(),value);
         Prefabs.CreateTodoObject(ToDoObjectPrefab,ToDoObjectsContainer,value,toDoObjectsCount.ToString());
     }
     private static void ShowTodoObjects()
@@ -341,7 +355,6 @@ public class ViewModel : MonoBehaviour
         ToDoValues = newTodoValues;
         ShowTodo();
     }
-
     public static void ShowTodo()
     {
         ClearContent(ToDoContainer);
@@ -368,32 +381,30 @@ public class ViewModel : MonoBehaviour
         }
         CheckEmptyTimetable("lists");
     }
-
     public static void AddTodo(string value)
     {
         DBTodo.AddItemInList(dateSelected,currentKey,value);
     }
-
     public static void DeleteListItem(string value)
     {
         DBTodo.DeleteListItem(dateSelected,currentKey,value);
     }
-
-    public static void UpdateItemState(string value)
+    public static void UpdateItemState(string value, bool status)
     {
-        DBTodo.UpdateItemState(dateSelected,currentKey,value);
+        DBTodo.UpdateItemState(dateSelected,currentKey,value, status);
     }
-
     public static void DeleteList()
     {
         DBTodo.DeleteList(dateSelected,currentKey);
     }
-
     public static void AddList(MTodo newList)
     {
         DBTodo.AddList(dateSelected,newList);
     }
 
+    
+    
+    
     public static void ShowAllEvents()
     { 
         ClearContent(AllContainer);
@@ -411,7 +422,6 @@ public class ViewModel : MonoBehaviour
         }
         
     }
-    
     public static void ShowAllNotes()
     {
         ClearContent(AllContainer);
@@ -428,7 +438,6 @@ public class ViewModel : MonoBehaviour
             }
         }
     }
-    
     public static void ShowAllLists()
     {
         ClearContent(AllContainer);
@@ -454,32 +463,37 @@ public class ViewModel : MonoBehaviour
 
         }
     }
-
     public static void ClearAllContainer()
     {
         ClearContent(AllContainer);
     }
-
     public static void FillCategorySelect()
     {
-        categorySelect.ClearOptions();
-        List<string> values = new List<string>();
-
-        foreach (var category in categoriesValues)
+        if (categorySelect != null)
         {
-            values.Add(category.Key);
-        }
-        categorySelect.AddOptions(values);
-    }
+            categorySelect.options.Clear();
+            int defaultIndex = 0;
+            int currentIndex = 0;
+            List<string> values = new List<string>();
 
+            foreach (var category in categoriesValues)
+            {
+                values.Add(category.Key);
+                if (category.Key == "По умолчанию")
+                    defaultIndex = currentIndex;
+                currentIndex++;
+            }
+
+            categorySelect.AddOptions(values);
+            categorySelect.value = defaultIndex;
+        }
+    }
     private void SelectOption()
     {
         TMP_Text currentOption = categorySelect.captionText;
         string textOption = currentOption.text;
         string newColor = "";
 
-        Debug.Log(textOption);
-        
         foreach (var category in categoriesValues)
         {
             if (textOption == category.Key)
@@ -494,7 +508,6 @@ public class ViewModel : MonoBehaviour
            currentOption.color = newCol;
         }
     }
-
     public static void ShowSelectedEvents()
     {
         ClearContent(AllContainer);
@@ -518,8 +531,6 @@ public class ViewModel : MonoBehaviour
             }
         }
     }
-
-
     public static void ChangeShowType(string type)
     {
         string resultType = "";
@@ -545,7 +556,6 @@ public class ViewModel : MonoBehaviour
         
         DBUser.ChangeShowType(resultType);
     }
-
     public static void ChangeContainersOrder(string type)
     {
         switch (type)
@@ -580,12 +590,13 @@ public class ViewModel : MonoBehaviour
         }
     }
     
+    
+    
     public static void SetPlansValues(Dictionary<string, List<MPlan>> newPlansValues)
     {
         PlansValues = newPlansValues;
         ShowPlan();
     }
-
     public static void ShowPlan()
     {
         ClearContent(PlansContainer);
@@ -612,7 +623,6 @@ public class ViewModel : MonoBehaviour
             else EmptyPlans.gameObject.SetActive(true);
         }
     }
-
     private static MPlan FindCurrentPLan(List<MPlan> values, string month)
     {
         MPlan plan = new MPlan();
@@ -627,6 +637,90 @@ public class ViewModel : MonoBehaviour
         }
 
         return plan;
+    }
+
+    
+    
+    public static bool CheckIfExist(string date, string key)
+    {
+        bool result = false;
+        string dateEvent = ReplaceWith(date);
+        if (EventsValues.ContainsKey(dateEvent))
+        {
+            List<MEvent> currentList = EventsValues[dateEvent];
+
+            foreach (MEvent currentEvent in currentList)
+            {
+                if (currentEvent.StartTime == key)
+                {
+                    result = true;
+                    existEvent = currentEvent;
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+    public static void UpdateItem(Dictionary<string, string> newEvent)
+    {
+        DBEvent.DBEventDelete(dateSelected, existEvent.StartTime);
+        AddNewEvent(newEvent);
+    }
+    public static bool DBRefExist(string node)
+    {
+        bool result = false;
+
+        switch (node)
+        {
+            case "calendar":
+            {
+                if (EventsValues.Count > 0)
+                    result = true;
+                break;
+            }
+            case "notes":
+            {
+                if (NotesValues.Count > 0)
+                    result = true;
+                break;
+            }
+            case "plans":
+            {
+                if (PlansValues.Count > 0)
+                    result = true;
+                break;
+            }
+            case "todo":
+            {
+                if (ToDoValues.Count > 0)
+                    result = true;
+                break;
+            }
+            default:
+            {
+                result = true;
+                break;
+            }
+        }
+        return result;   
+    }
+    public static void UpdateEventsAfterDeletingCategory(string deletedCategory)
+    {
+        foreach (var item in EventsValues)
+        {
+            string date = item.Key;
+            
+            foreach (MEvent currentEvent in item.Value)
+            {
+                if (currentEvent.CategoryName == deletedCategory)
+                {
+                    currentEvent.CategoryName = "По умолчанию";
+                    currentEvent.CategoryColour = "#9792F7";
+                    DBEvent.DBEventAdd(date,currentEvent);
+                }
+            }   
+        }
     }
 }
 

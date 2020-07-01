@@ -9,22 +9,23 @@ public class CalendarScene : MonoBehaviour
 {
     [Header("UI elements")] public Transform TimelinePanel;
     public Transform CalendarPanel;
-    public TextMeshProUGUI EmprtyPlans;
+    public TextMeshProUGUI EmptyPlans;
     private List<Transform> weeks = new List<Transform>();
     private TextMeshProUGUI monthText, nextText, previousText, currentYearText;
+    public GameObject ButtonShowSelectedDay;
+    public static GameObject buttonShowSelected;
 
     private int[] daysPerMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    public static int currentYear, currentMonth;
+    public static int currentYear, currentMonth, currentDayNumber;
     public static Transform selectedObj { get; set; }
     public static Transform currentDay { get; set; }
 
     private CultureInfo localCultureInfo = new CultureInfo("ru-RU");
 
-    void Awake()
+    private void Awake()
     {
-        ViewModel.EmptyPlans = EmprtyPlans;
+        ViewModel.EmptyPlans = EmptyPlans;
     }
-    
     void Start()
     {
         monthText = TimelinePanel.Find("CurrentMonth/Text").GetComponent<TextMeshProUGUI>();
@@ -45,7 +46,7 @@ public class CalendarScene : MonoBehaviour
         CheckTypeOfYear();
         FillCalendar();
         UpdateMonthTimeline();
-
+        buttonShowSelected = ButtonShowSelectedDay;
     }
 
     private void FillCalendar()
@@ -96,13 +97,12 @@ public class CalendarScene : MonoBehaviour
 
         ShowTodayDate();
     }
-
     private void CheckTypeOfYear() //Если год високосный, то в феврале 29 дней
     {
         if (DateTime.Today.Year % 4 == 0)
             daysPerMonth[1] = 29;
     }
-
+  
     public void NextMonth()
     {
         currentMonth++;
@@ -115,8 +115,8 @@ public class CalendarScene : MonoBehaviour
         UpdateMonthTimeline();
         FillCalendar();
         ViewModel.ShowPlan();
+        ButtonShowSelectedDay.SetActive(false);
     }
-
     public void PreviousMonth()
     {
         currentMonth--;
@@ -129,8 +129,8 @@ public class CalendarScene : MonoBehaviour
         UpdateMonthTimeline();
         FillCalendar();
         ViewModel.ShowPlan();
+        ButtonShowSelectedDay.SetActive(false);
     }
-
     private void UpdateMonthTimeline()
     {
         int previous = currentMonth - 1;
@@ -148,7 +148,6 @@ public class CalendarScene : MonoBehaviour
         string str = localCultureInfo.DateTimeFormat.GetMonthName(index);
         return ToTitleCase(str);
     }
-
     private void ShowTodayDate()
     {
         if (selectedObj)
@@ -183,7 +182,6 @@ public class CalendarScene : MonoBehaviour
             }
         }
     }
-
     private void ClearCalendar()
     {
         foreach (Transform week in weeks)
@@ -195,7 +193,6 @@ public class CalendarScene : MonoBehaviour
             }
         }
     }
-
     private void ClearDayPlate(Transform day)
     {
         TextMeshProUGUI numberText = day.Find("Number").GetComponent<TextMeshProUGUI>();
@@ -204,18 +201,18 @@ public class CalendarScene : MonoBehaviour
         panel.color = Color.white;
         numberText.color = Color.black;
     }
-
     public string ToTitleCase(string str)
     {
         return localCultureInfo.TextInfo.ToTitleCase(str.ToLower());
     }
-
     public void ToToday()
     {
         currentMonth = DateTime.Today.Month;
         currentYear = DateTime.Today.Year;
         UpdateMonthTimeline();
         FillCalendar();
+        ViewModel.ShowPlan();
+        ButtonShowSelectedDay.SetActive(false);
     }
 
     public static void AddNewItemInPlan(string value)
@@ -224,18 +221,17 @@ public class CalendarScene : MonoBehaviour
         string month = currentMonth.ToString();
         DBPlans.AddItemInPlan(year,month,value);
     }
-
     public static void DeleteItemInPlan(string value)
     {
         string year = currentYear.ToString();
         string month = currentMonth.ToString();
         DBPlans.DeletePLanItem(year,month,value);
     }
-
     public static void UpdateItemState(string value, bool status)
     {
         string year = currentYear.ToString();
         string month = currentMonth.ToString();
         DBPlans.UpdateItemState(year,month,value,status);
     }
+    
 }

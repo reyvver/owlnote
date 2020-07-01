@@ -12,6 +12,7 @@ public class PrefabPlanItem : MonoBehaviour
     private void Start()
     {
         checkmark = thisItem.GetComponent<Toggle>();
+        checkmark.onValueChanged.AddListener(delegate { OnChangeState(checkmark);});
     }
 
     public void OnDeleteButton()
@@ -19,9 +20,8 @@ public class PrefabPlanItem : MonoBehaviour
         CalendarScene.DeleteItemInPlan(itemName.text);
     }
 
-    public void OnChangeState()
+    private void OnChangeState(Toggle change)
     {
-        if(checkmark)
-            CalendarScene.UpdateItemState(itemName.text,checkmark);
+        CalendarScene.UpdateItemState(itemName.text,change.isOn);
     }
 }

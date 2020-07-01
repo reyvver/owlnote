@@ -13,6 +13,7 @@ public class PrefabToDo : MonoBehaviour
    {
        listName = thisItem.transform.parent.parent.Find("PanelHeaderTodo/Title").GetComponent<TextMeshProUGUI>();
        checkmark = thisItem.GetComponent<Toggle>();
+       checkmark.onValueChanged.AddListener(delegate { OnChangeState(checkmark);});
    }
 
    public void OnDeleteButton()
@@ -21,12 +22,9 @@ public class PrefabToDo : MonoBehaviour
        ViewModel.DeleteListItem(itemName.text);
    }
 
-   public void OnChangeState()
+   private void OnChangeState(Toggle change)
    {
-       if (checkmark == true)
-       {
-           ViewModel.currentKey = listName.text;
-           ViewModel.UpdateItemState(itemName.text);
-       }
+       ViewModel.currentKey = listName.text;
+      ViewModel.UpdateItemState(itemName.text, checkmark.isOn); 
    }
 }

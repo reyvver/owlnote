@@ -93,10 +93,10 @@ public class DBTodo : MonoBehaviour
         _reference.Child(dateTodo).Child(listName).Child(itemName).RemoveValueAsync();
     }
 
-    public static void UpdateItemState(string date,string listName,string itemName)
+    public static void UpdateItemState(string date,string listName,string itemName, bool status)
     {
         string dateTodo = ReplaceWith(date);
-        _reference.Child(dateTodo).Child(listName).Child(itemName).SetValueAsync(true);
+        _reference.Child(dateTodo).Child(listName).Child(itemName).SetValueAsync(status);
     }
 
     public static void AddList(string date, MTodo list)
@@ -124,5 +124,6 @@ public class DBTodo : MonoBehaviour
 
         return result;
     }
+
 
 }

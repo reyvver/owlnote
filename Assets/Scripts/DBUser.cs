@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEngine;
-using Firebase;
 using Firebase.Auth;
 using Firebase.Database;
 using UnityEngine.SceneManagement;
 using TMPro;
+using UnityEngine.UI;
+using DG.Tweening;
 
 public class DBUser : MonoBehaviour
 {
@@ -16,25 +18,48 @@ public class DBUser : MonoBehaviour
     public Transform PanelUserOperation;
     public TMP_InputField newPassword;
     public TMP_InputField verifyPassword;
-  //  public static string userShowType;
+    public GameObject TutionPanel;
+    public GameObject checkmark;
     public List<TMP_InputField> inputs;
     private  FirebaseUser currentUser;
-    
+    private Toggle showAgain;
     private static string  operation, _errorMessage, currentPassword;
-    private bool _emailVerified, _delete, _reset;
+    private bool _emailVerified, _delete, _reset, _showTution;
     private TextMeshProUGUI textSuccess;
     private static bool _reauthenticate;
-    
+    public List<RectTransform> tutionPanels;
     private static DatabaseReference _reference;
-    
+    private Transform panelsContainer;
+    private int index;
+    private GameObject ButtonLeft, ButtonRight;
+    private RectTransform currentRect;
+
+    private bool _setting;
+    public static bool _deleteProcess;
     
     // Start is called before the first frame update
     void Start()
     {
+        _setting = false;
+        _deleteProcess = false;
+        
+        showAgain = checkmark.GetComponent<Toggle>();
         currentUser = FirebaseAuth.DefaultInstance.CurrentUser;
         textSuccess = PanelUserOperation.GetChild(1).GetComponent<TextMeshProUGUI>();
+        
         ReloadUser();
         InitializeDatabase();
+        
+        ButtonLeft =  TutionPanel.transform.Find("Panel/PanelButtons/ButtonLeft").gameObject;
+        ButtonRight =  TutionPanel.transform.Find("Panel/PanelButtons/ButtonRight").gameObject;
+        
+        index = 0;
+        panelsContainer = TutionPanel.transform.Find("Panel/TutionsPanels");
+        tutionPanels = new List<RectTransform>();
+        foreach (Transform panel in panelsContainer)
+        {
+            tutionPanels.Add(panel.GetComponent<RectTransform>());
+        }
     }
     
     private void InitializeDatabase()
@@ -57,6 +82,7 @@ public class DBUser : MonoBehaviour
         if (snapshot.ChildrenCount > 0)
         {
             string userShowType = snapshot.Child("showType").Value.ToString();
+            _showTution = Convert.ToBoolean(snapshot.Child("tution").Value);
             ViewModel.ChangeContainersOrder(userShowType);
         }
         else
@@ -65,6 +91,7 @@ public class DBUser : MonoBehaviour
                 AddDefaultSetting();
             }
 
+        ShowTution();
     }
     private void OnDestroy()
     {
@@ -113,17 +140,14 @@ public class DBUser : MonoBehaviour
 
         if (!_reauthenticate) return;
 
-
-
-        if (_delete)
-        {
-            textSuccess.text = "Аккаунт успешно удален";
-            _delete = false;
-            _reauthenticate = false;
-            PanelUserOperation.gameObject.SetActive(true);
-            PanelUserOperation.SetAsLastSibling();
-        }
-        if (_reset)
+            if (operation == "delete")
+            { 
+                Debug.Log("gee");
+                _reauthenticate = false;
+                DeleteSettings();
+            }
+            
+            if (_reset)
         {
             
             textSuccess.text = "Пароль успешно изменен. Перезайдите в приложение";
@@ -133,14 +157,20 @@ public class DBUser : MonoBehaviour
             PanelUserOperation.gameObject.SetActive(true);
             PanelUserOperation.SetAsLastSibling();
         }
-        
+
+      
+
         Clear();
 
     }
 
     private void AddDefaultSetting()
     {
-        _reference.Child("showType").SetValueAsync("event");
+        if (!_deleteProcess)
+        {
+            _reference.Child("showType").SetValueAsync("event");
+            _reference.Child("tution").SetValueAsync(false);
+        }
     }
 
     public static void ChangeShowType(string newValue)
@@ -191,7 +221,7 @@ public class DBUser : MonoBehaviour
     
 
 
-    public void LogOutUser()
+    public static void LogOutUser()
     {
         FirebaseAuth.DefaultInstance.SignOut();
         SceneManager.LoadScene(0);
@@ -208,13 +238,6 @@ public class DBUser : MonoBehaviour
             if (task.Exception != null)
                 foreach (Exception exception in task.Exception.Flatten().InnerExceptions)
                 {
-                    string authErrorCode = "";
-
-                    if (exception is FirebaseException firebaseEx)
-                    {
-                        authErrorCode = $"AuthError.{((AuthError) firebaseEx.ErrorCode).ToString()}: ";
-                    }
-
                     _errorMessage = exception.Message;
                 }
         }
@@ -227,8 +250,7 @@ public class DBUser : MonoBehaviour
 
     //подтверждение важной операции через реавторизацию
     private void Reauthenticate()
-    {
-        Debug.Log(currentPassword);
+    { 
         string emailUser = currentUser.Email;
         Credential credential = EmailAuthProvider.GetCredential(emailUser, currentPassword);
         currentUser?.ReauthenticateAsync(credential).ContinueWith(HandleReauthenticate);
@@ -240,7 +262,7 @@ public class DBUser : MonoBehaviour
             _reauthenticate = true;
             if (operation == "delete")
             {
-                DeleteUser();
+                DeleteSettings();
             }
             if (operation == "password-reset")
             {
@@ -253,6 +275,7 @@ public class DBUser : MonoBehaviour
     
     public void DeletingUser(TMP_InputField verifyToDelete)
     {
+        _deleteProcess = true;
         _reauthenticate = false;
         _errorMessage = "";
         operation = "delete";
@@ -264,7 +287,7 @@ public class DBUser : MonoBehaviour
     }
     private void DeleteUser()
     {
-        FirebaseUser user = FirebaseAuth.DefaultInstance.CurrentUser;
+      FirebaseUser user = FirebaseAuth.DefaultInstance.CurrentUser;
         user?.DeleteAsync().ContinueWith(HandleDeletingUser);
     }
     private void HandleDeletingUser(Task userTask)
@@ -298,7 +321,6 @@ public class DBUser : MonoBehaviour
         currentPassword =  passwordCurrent.text;
         Reauthenticate();
     }
-    
     private void ResetPassword()
     {
         if (CheckResetPassword())
@@ -313,7 +335,6 @@ public class DBUser : MonoBehaviour
             _reset = true;
         }
     }
-
     private bool CheckResetPassword()
     {
         bool result = false;
@@ -331,5 +352,121 @@ public class DBUser : MonoBehaviour
 
         return result;
     }
+    private void ShowTution()
+    {
+        if (!_showTution)
+        {
+            TutionPanel.SetActive(true);
+        }
+        else
+        {
+            TutionPanel.transform.SetAsFirstSibling();
+        }
+    }
+    public void CloseTution()
+    {
+        TutionPanel.SetActive(false);
+        TutionPanel.transform.SetAsFirstSibling();
 
+        if (showAgain.isOn && !_showTution)
+        {
+            _reference.Child("tution").SetValueAsync(true);
+        }
+    }
+    public void OnLeft()
+    {
+        if (index ==1)
+        {
+            ButtonLeft.SetActive(false);
+        }
+        else
+        {
+
+            ButtonRight.SetActive(true);
+        }
+
+        currentRect = tutionPanels[index];
+        currentRect.DOAnchorPos(new Vector2(878,1), 0.4f);
+        index--;
+    }
+    public void OnRight()
+    {
+        index++;
+        if (index == 4)
+        {
+            ButtonRight.SetActive(false);
+        }     
+        else
+        {
+            ButtonLeft.SetActive(true);
+          
+        }
+        currentRect = tutionPanels[index];
+        currentRect.DOAnchorPos(Vector2.zero, 0.4f);
+    }
+
+    
+    
+    public void DeleteSettings()
+    {
+        StartCoroutine(DeleteInfo());
+    }
+
+    private void DeleteNode(string Node)
+    {
+        _setting = false;
+        DatabaseReference currentReference = FirebaseDatabase.DefaultInstance.GetReference(
+            "/"+Node+"/" + FirebaseAuth.DefaultInstance.CurrentUser.UserId);
+        currentReference.RemoveValueAsync().ContinueWith(HandleDeletingNode);
+    }
+    
+    private void HandleDeletingNode(Task userTask)
+    {
+        if (LogTaskCompletion(userTask))
+        {
+            _setting = true;
+        }
+    }
+
+
+    IEnumerator DeleteInfo()
+    {
+        if (ViewModel.DBRefExist("calendar"))
+        {
+            DeleteNode("calendar");
+            yield return new WaitUntil(() => _setting);
+        }
+        if (ViewModel.DBRefExist("categories"))
+        {
+            DeleteNode("categories");
+            yield return new WaitUntil(() =>_setting);
+        }
+        if (ViewModel.DBRefExist("notes"))
+        {
+            DeleteNode("notes");
+            yield return new WaitUntil(() =>_setting);
+        }
+        if (ViewModel.DBRefExist("plans"))
+        {
+            DeleteNode("plans");
+            yield return new WaitUntil(() =>_setting);
+        }
+        if (ViewModel.DBRefExist("todo"))
+        {
+            DeleteNode("categories");
+            yield return new WaitUntil(() =>_setting);
+        }
+        if (ViewModel.DBRefExist("settings"))
+        {
+            DeleteNode("settings");
+            yield return new WaitUntil(() =>_setting);
+        }
+         yield return new WaitForSeconds(0.01f);
+        DeleteUser();
+        textSuccess.text = "Аккаунт успешно удален";
+        _reauthenticate = false;
+        PanelUserOperation.gameObject.SetActive(true);
+        PanelUserOperation.SetAsLastSibling();
+    }
+    
 }

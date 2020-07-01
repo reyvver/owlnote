@@ -25,6 +25,13 @@ public class PrefabCalendarDay : MonoBehaviour
 
         CalendarScene.selectedObj = currentObject;
         Select();
+
+        if (currentNumber.text != "")
+        {
+            CalendarScene.currentDayNumber = Convert.ToInt32(currentNumber.text);
+            CalendarScene.buttonShowSelected.SetActive(true);
+        }
+        else   CalendarScene.buttonShowSelected.SetActive(false);
     }
 
     private void Select()

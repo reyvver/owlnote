@@ -35,7 +35,7 @@ public class DBNote : MonoBehaviour
 
     }
 
-   private void HandleValueChanged(object sender, ValueChangedEventArgs args)
+    private void HandleValueChanged(object sender, ValueChangedEventArgs args)
     {
         if (args.DatabaseError != null)
         {
@@ -104,5 +104,4 @@ public class DBNote : MonoBehaviour
         return result;
     }
     
-
 }

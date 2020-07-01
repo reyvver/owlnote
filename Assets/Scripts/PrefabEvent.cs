@@ -7,7 +7,7 @@ public class PrefabEvent : MonoBehaviour
 {
    private bool isShown = false;
    public GameObject deleteButton;
-   public TextMeshProUGUI StartDay, Title;
+   public TextMeshProUGUI StartTime, Title;
 
    private void Start()
    {
@@ -21,18 +21,22 @@ public class PrefabEvent : MonoBehaviour
        
        if (isShown)
        {
-           settingPosition.DOSizeDelta(new Vector2(785, 570), 0.25f);
+           settingPosition.DOSizeDelta(new Vector2(785, 570), 0.35f);
        }
        else
        {
-           settingPosition.DOSizeDelta(new Vector2(785, 0), 0.25f);
+           settingPosition.DOSizeDelta(new Vector2(785, 0), 0.35f);
        }
    }
 
    private void OnDeleteButton()
    {
        View.Delete(Title,"event");
-       ViewModel.currentKey = StartDay.text;
+       ViewModel.currentKey = StartTime.text;
    }
    
+   public void OnEditButton()
+   {
+       View.UpdateEvent(StartTime.text);
+   }
 }

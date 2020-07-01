@@ -27,8 +27,15 @@ public class ScrollRectScript : MonoBehaviour
 
     public void SetDefaultTime()
     {
-        hoursScroll.SnapToElement(0);
-        minutesScroll.SnapToElement(4);
+        try
+        {
+            hoursScroll.SnapToElement(12);
+            minutesScroll.SnapToElement(26);
+        }
+        catch (Exception ex)
+        {
+          //  Debug.Log(ex.Message);
+        }
     }
     
 }

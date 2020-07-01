@@ -1,14 +1,12 @@
 ﻿using System.Collections.Generic;
-using Firebase;
 using Firebase.Auth;
 using Firebase.Database;
-using Firebase.Unity.Editor;
 using UnityEngine;
 
 
-public class DBCategory: MonoBehaviour
+public class DBCategory : MonoBehaviour
 {
-    private static Dictionary<string, string> categoriesValues = new Dictionary<string,  string>();
+    private static Dictionary<string, string> categoriesValues = new Dictionary<string, string>();
 
     private static DatabaseReference _reference;
 
@@ -16,14 +14,16 @@ public class DBCategory: MonoBehaviour
     {
         InitializeDatabase();
     }
-    
+
     private void InitializeDatabase()
     {
-        _reference = FirebaseDatabase.DefaultInstance.GetReference("/categories/" + FirebaseAuth.DefaultInstance.CurrentUser.UserId);
+        _reference =
+            FirebaseDatabase.DefaultInstance.GetReference(
+                "/categories/" + FirebaseAuth.DefaultInstance.CurrentUser.UserId);
         _reference.ValueChanged += HandleValueChanged;
         Debug.Log("done categories");
     }
-    
+
     private void OnDestroy()
     {
         try
@@ -37,7 +37,7 @@ public class DBCategory: MonoBehaviour
 
     }
 
-   private void HandleValueChanged(object sender, ValueChangedEventArgs args)
+    private void HandleValueChanged(object sender, ValueChangedEventArgs args)
     {
         if (args.DatabaseError != null)
         {
@@ -50,42 +50,38 @@ public class DBCategory: MonoBehaviour
         DataSnapshot snapshot = args.Snapshot;
 
         if (snapshot.ChildrenCount == 0)
-            AddDefaultCategory();
+        {
+            if(!DBUser._deleteProcess)
+                AddDefaultCategory();
+        }
         else
         {
             foreach (DataSnapshot childDataSnapshot in snapshot.Children)
             {
                 string name = childDataSnapshot.Key;
                 string color = (string) childDataSnapshot.GetValue(true);
-                
-                categoriesValues.Add(name,color);
+
+                categoriesValues.Add(name, color);
             }
         }
+
         ViewModel.SetCategoriesValues(categoriesValues);
     }
 
     public static void DBCategoryDelete(string key)
     {
         _reference.Child(key).RemoveValueAsync();
+        ViewModel.UpdateEventsAfterDeletingCategory(key);
     }
 
     public static void DBEventAdd(string name, string colour)
     {
         _reference.Child(name).SetValueAsync(colour);
     }
-    
+
     private void AddDefaultCategory()
     {
         _reference.Child("По умолчанию").SetValueAsync("#9792F7");
-    }
-
-    private  string ReplaceWith(string str)
-    {
-        string result = "";
-
-        result = str.Replace(str.Contains(@"/") ? "/" : ".", @"\");
-
-        return result;
     }
     
 

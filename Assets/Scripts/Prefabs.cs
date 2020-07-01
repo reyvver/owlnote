@@ -16,9 +16,9 @@ public class Prefabs : MonoBehaviour
         Transform additionalContent = currentObject.GetChild(1);
         
         Transform colorObj = mainContent.Find("EventColour");
-        Transform titleObj = mainContent.Find("EventTitle");
-        Transform startTime = mainContent.Find("TimePanel/TimeStart");
-        Transform endTime =  mainContent.Find("TimePanel/TimeEnd");
+        Transform titleObj = mainContent.Find("InfoPanel/EventTitle");
+        Transform startTime = mainContent.Find("InfoPanel/TimePanel/TimeStart");
+        Transform endTime =  mainContent.Find("InfoPanel/TimePanel/TimeEnd");
 
         Transform category = additionalContent.Find("Category/CategoryText");
         Transform description = additionalContent.Find("Description/TextScroll/DescriptionText");
@@ -34,6 +34,7 @@ public class Prefabs : MonoBehaviour
         if (ColorUtility.TryParseHtmlString(currentEvent.CategoryColour, out var newCol))
         {
             colorObj.GetComponent<Image>().color = newCol;
+            titleObj.GetComponent<TextMeshProUGUI>().color = newCol;
         }
         
         if (!interactable)

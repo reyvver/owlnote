@@ -94,6 +94,6 @@ public class DBPlans : MonoBehaviour
     {
         _reference.Child(dateYear).Child(dateMonth).Child(itemName).SetValueAsync(value);
     }
-    
+
 
 }
