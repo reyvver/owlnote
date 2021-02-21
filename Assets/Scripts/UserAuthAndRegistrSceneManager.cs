@@ -73,4 +73,10 @@ public class UserAuthAndRegistrSceneManager : MonoBehaviour
     {
         obj.transform.SetAsLastSibling();
     }
+
+    public void CloseWelcomeScene(GameObject obj)
+    {
+        ShowScene(obj);
+        WelcomeScene.SetActive(false);
+    }
 }
