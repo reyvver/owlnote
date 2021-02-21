@@ -37,15 +37,8 @@ public class UserAuthAndRegistrSceneManager : MonoBehaviour
                 }
             }
             else {
+                RegistrationScene.transform.SetAsFirstSibling();
 
-                try
-                {
-                    RegistrationScene.transform.SetAsFirstSibling();
-                }
-                catch (Exception e)
-                {
-                }
-  
             }
             
             if (openedPanels.Count == 0)
@@ -79,5 +72,11 @@ public class UserAuthAndRegistrSceneManager : MonoBehaviour
     public void ShowScene(GameObject obj)
     {
         obj.transform.SetAsLastSibling();
+    }
+
+    public void CloseWelcomeScene(GameObject obj)
+    {
+        ShowScene(obj);
+        WelcomeScene.SetActive(false);
     }
 }

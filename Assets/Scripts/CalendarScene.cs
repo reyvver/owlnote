@@ -1,59 +1,87 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using System;
 using System.Globalization;
+using System.Collections.Generic;
 using TMPro;
-using UnityEngine.Rendering;
 
 public class CalendarScene : MonoBehaviour
 {
-//    public TextMeshProUGUI tMonth, tDayOfWeek;
-    //  private List<int> NumberOfDaysInMonths = new List<int>();
-    public TextMeshProUGUI monthText, nextText, previousText, currentYearText;
-    private int[] daysPerMonth = new[] {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    public int currentYear, currentMonth;
+    [Header("UI elements")] public Transform TimelinePanel;
+    public Transform CalendarPanel;
+    public TextMeshProUGUI EmptyPlans;
+    private List<Transform> weeks = new List<Transform>();
+    private TextMeshProUGUI monthText, nextText, previousText, currentYearText;
+    public GameObject ButtonShowSelectedDay;
+    public static GameObject buttonShowSelected;
 
+    private int[] daysPerMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    public static int currentYear, currentMonth, currentDayNumber;
+    public static Transform selectedObj { get; set; }
+    public static Transform currentDay { get; set; }
+
+    private CultureInfo localCultureInfo = new CultureInfo("ru-RU");
+
+    private void Awake()
+    {
+        ViewModel.EmptyPlans = EmptyPlans;
+    }
     void Start()
     {
+        monthText = TimelinePanel.Find("CurrentMonth/Text").GetComponent<TextMeshProUGUI>();
+        currentYearText = TimelinePanel.Find("CurrentMonth/CurrentYear").GetComponent<TextMeshProUGUI>();
+
+
+        nextText = TimelinePanel.Find("NextMonth").GetComponent<TextMeshProUGUI>();
+        previousText = TimelinePanel.Find("PreviousMonth").GetComponent<TextMeshProUGUI>();
+
+
+        foreach (Transform currentWeek in CalendarPanel)
+        {
+            weeks.Add(currentWeek);
+        }
+
         currentYear = DateTime.Today.Year;
         currentMonth = DateTime.Today.Month;
         CheckTypeOfYear();
         FillCalendar();
         UpdateMonthTimeline();
+        buttonShowSelected = ButtonShowSelectedDay;
     }
 
     private void FillCalendar()
     {
-
+        ClearCalendar();
         //Определяется день недели первого дня в месяце
         int firstDayOfWeek = (int) new DateTime(currentYear, currentMonth, 1).DayOfWeek;
         int currentDay = 1; //Номер дня (Будет менятся от 1 до 30 или 31)
         bool chk = false; //Переменная для проверки полной заполненности месяца
         if (firstDayOfWeek == 0) firstDayOfWeek = 7;
         if (firstDayOfWeek == 6) firstDayOfWeek = 1;
-        //Для первой недели:
-        GameObject firstWeek = GameObject.Find("Week1");
+
+
+        int weekNumber = 0;
+        Transform currentWeek = weeks[weekNumber];
+
         for (int i = firstDayOfWeek; i <= 7; i++)
         {
-            Transform date = firstWeek.transform.Find(Convert.ToString(i)); //день в неделе
-            TextMeshProUGUI numberText = date.Find("Number").GetComponent<TextMeshProUGUI>(); //находится его текстовое поле
+            Transform date = currentWeek.Find(Convert.ToString(i));
+            TextMeshProUGUI
+                numberText = date.Find("Number").GetComponent<TextMeshProUGUI>(); //находится его текстовое поле
             numberText.text = currentDay.ToString(); //присваевается номер
-            ColourCurrentDay(date, currentDay);
             currentDay++;
         }
 
-        //Для последующих недель
         for (int i = 2; i <= 6; i++)
         {
-            GameObject week = GameObject.Find("Week" + i); //берется следующая неделя
+            weekNumber++;
+            currentWeek = weeks[weekNumber]; //берется следующая неделя
             for (int j = 1; j <= 7; j++)
             {
-                Transform date = week.transform.Find(Convert.ToString(j)); //день в неделе
+                Transform date = currentWeek.Find(Convert.ToString(j)); //день в неделе
                 TextMeshProUGUI
                     numberText = date.Find("Number").GetComponent<TextMeshProUGUI>(); //находится его текстовое поле
                 numberText.text = currentDay.ToString(); //присваевается номер
-                ColourCurrentDay(date, currentDay);
 
                 currentDay++;
                 if (currentDay > daysPerMonth[currentMonth - 1])
@@ -66,85 +94,144 @@ public class CalendarScene : MonoBehaviour
             if (chk)
                 break; //выход из внешнего цикла
         }
-    }
 
-    private void ColourCurrentDay(Transform date, int currentDay)
-    {
-        if (DateTime.Today.Day == currentDay && currentMonth == DateTime.Today.Month && currentYear == DateTime.Today.Year) //закрашиваем сегодняшний день
-        {
-            TextMeshProUGUI
-                numberText = date.Find("Number").GetComponent<TextMeshProUGUI>(); //находится его текстовое поле
-            Image panel = date.Find("Panel").GetComponent<Image>();
-            panel.color = new Color32(146, 96, 255, 255);
-            numberText.color = Color.white;
-        }
+        ShowTodayDate();
     }
-
     private void CheckTypeOfYear() //Если год високосный, то в феврале 29 дней
     {
         if (DateTime.Today.Year % 4 == 0)
             daysPerMonth[1] = 29;
     }
-
+  
     public void NextMonth()
     {
-        ClearAll();
         currentMonth++;
         if (currentMonth == 13)
         {
             currentYear++;
             currentMonth = 1;
         }
+
         UpdateMonthTimeline();
         FillCalendar();
+        ViewModel.ShowPlan();
+        ButtonShowSelectedDay.SetActive(false);
     }
-
     public void PreviousMonth()
     {
-        ClearAll();
         currentMonth--;
         if (currentMonth == 0)
         {
             currentYear--;
-            currentMonth = 12;
+            currentMonth = 12; 
         }
 
         UpdateMonthTimeline();
         FillCalendar();
+        ViewModel.ShowPlan();
+        ButtonShowSelectedDay.SetActive(false);
     }
-
     private void UpdateMonthTimeline()
     {
-        int previous = currentMonth-1;
-        int next = currentMonth+1;
+        int previous = currentMonth - 1;
+        int next = currentMonth + 1;
         if (previous == 0) previous = 12;
         if (next == 13) next = 1;
         currentYearText.text = currentYear.ToString();
         monthText.text = MonthName(currentMonth);
         nextText.text = MonthName(next);
-        previousText.text =MonthName(previous);
+        previousText.text = MonthName(previous);
     }
 
     private string MonthName(int index)
     {
-        return CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(index);
+        string str = localCultureInfo.DateTimeFormat.GetMonthName(index);
+        return ToTitleCase(str);
     }
-
-    private void ClearAll()
+    private void ShowTodayDate()
     {
-        for (int i = 1; i <= 6; i++)
+        if (selectedObj)
         {
-            GameObject week = GameObject.Find("Week" + i); 
-            
-            for (int j = 1; j <= 7; j++)
+            ClearDayPlate(selectedObj);
+        }
+
+        if (currentMonth == DateTime.Today.Month && currentYear == DateTime.Today.Year)
+        {
+            foreach (Transform week in weeks)
             {
-                Transform date = week.transform.Find(Convert.ToString(j));
-                TextMeshProUGUI numberText = date.Find("Number").GetComponent<TextMeshProUGUI>(); 
-                numberText.text = "";
-                Image panel = date.Find("Panel").GetComponent<Image>();
-                panel.color = new Color32(255,255,255,255);
-                numberText.color = Color.black;
+                foreach (Transform day in week)
+                {
+                    TextMeshProUGUI numberText = day.Find("Number").GetComponent<TextMeshProUGUI>();
+                    Image panel = day.Find("Panel").GetComponent<Image>();
+
+                    if (numberText.text == DateTime.Today.Day.ToString())
+                    {
+                        panel.color = InterfaceTheme.PurpleCustom;
+                        numberText.color = Color.white;
+                        currentDay = day;
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (currentDay)
+            {
+                ClearDayPlate(currentDay);
             }
         }
     }
+    private void ClearCalendar()
+    {
+        foreach (Transform week in weeks)
+        {
+            foreach (Transform day in week)
+            {
+                TextMeshProUGUI numberText = day.Find("Number").GetComponent<TextMeshProUGUI>();
+                numberText.text = "";
+            }
+        }
+    }
+    private void ClearDayPlate(Transform day)
+    {
+        TextMeshProUGUI numberText = day.Find("Number").GetComponent<TextMeshProUGUI>();
+        Image panel = day.Find("Panel").GetComponent<Image>();
+
+        panel.color = Color.white;
+        numberText.color = Color.black;
+    }
+    public string ToTitleCase(string str)
+    {
+        return localCultureInfo.TextInfo.ToTitleCase(str.ToLower());
+    }
+    public void ToToday()
+    {
+        currentMonth = DateTime.Today.Month;
+        currentYear = DateTime.Today.Year;
+        UpdateMonthTimeline();
+        FillCalendar();
+        ViewModel.ShowPlan();
+        ButtonShowSelectedDay.SetActive(false);
+    }
+
+    public static void AddNewItemInPlan(string value)
+    {
+        string year = currentYear.ToString();
+        string month = currentMonth.ToString();
+        DBPlans.AddItemInPlan(year,month,value);
+    }
+    public static void DeleteItemInPlan(string value)
+    {
+        string year = currentYear.ToString();
+        string month = currentMonth.ToString();
+        DBPlans.DeletePLanItem(year,month,value);
+    }
+    public static void UpdateItemState(string value, bool status)
+    {
+        string year = currentYear.ToString();
+        string month = currentMonth.ToString();
+        DBPlans.UpdateItemState(year,month,value,status);
+    }
+    
 }
