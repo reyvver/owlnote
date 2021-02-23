@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Firebase;
 using Firebase.Auth;
 using Firebase.Database;
-using Firebase.Unity.Editor;
 using UnityEngine;
 
 
@@ -32,9 +32,11 @@ public class DBEvent : MonoBehaviour
 
     private void InitializeDatabase()
     {
-        FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://owlnote-dragunovatv.firebaseio.com/");
+        var options = new AppOptions();
+        options.DatabaseUrl = new Uri("https://owlnote-dragunovatv.firebaseio.com/");
+        FirebaseApp app = FirebaseApp.Create(options);
         _reference = FirebaseDatabase.DefaultInstance.GetReference(
-                "/calendar/" + FirebaseAuth.DefaultInstance.CurrentUser.UserId);
+            "/calendar/" + FirebaseAuth.DefaultInstance.CurrentUser.UserId);
         _reference.ValueChanged += HandleValueChanged;
         Debug.Log("done events");
     }
@@ -101,6 +103,7 @@ public class DBEvent : MonoBehaviour
         string dateEvent = ReplaceWith(date);
         _reference.Child(dateEvent).Child(key).RemoveValueAsync();
     }
+
     public static void DBEventAdd(string date, Dictionary<string, string> newEvent)
     {
         string dateEvent = ReplaceWith(date);
@@ -110,6 +113,7 @@ public class DBEvent : MonoBehaviour
         string json = JsonUtility.ToJson(ToCurrentClass(newEvent));
         _reference.Child(dateEvent).Child(key).SetRawJsonValueAsync(json);
     }
+
     public static void DBEventAdd(string date, MEvent newEvent)
     {
         string dateEvent = ReplaceWith(date);
@@ -118,7 +122,7 @@ public class DBEvent : MonoBehaviour
         string json = JsonUtility.ToJson(ToCurrentClass(newEvent));
         _reference.Child(dateEvent).Child(key).SetRawJsonValueAsync(json);
     }
-    
+
     private static EventClass ToCurrentClass(Dictionary<string, string> values)
     {
         string title = values["title"];
@@ -134,6 +138,7 @@ public class DBEvent : MonoBehaviour
         EventClass newEvent = new EventClass(title, endTime, categoryName, categoryColour, description);
         return newEvent;
     }
+
     private static EventClass ToCurrentClass(MEvent values)
     {
         string title = values.Title;
@@ -155,6 +160,4 @@ public class DBEvent : MonoBehaviour
 
         return result;
     }
-
-   
 }

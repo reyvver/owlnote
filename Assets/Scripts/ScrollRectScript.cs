@@ -19,10 +19,10 @@ public class ScrollRectScript : MonoBehaviour
     }
 
     private void Update()
-    { 
-        hours =hoursScroll.result;
+    {
+        hours = hoursScroll.result;
         minutes = minutesScroll.result;
-        textResult.text =  hours +  " ч " + minutes+ " мин";
+        textResult.text = hours + " ч " + minutes + " мин";
     }
 
     public void SetDefaultTime()
@@ -32,10 +32,9 @@ public class ScrollRectScript : MonoBehaviour
             hoursScroll.SnapToElement(12);
             minutesScroll.SnapToElement(26);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-          //  Debug.Log(ex.Message);
+            // ignored
         }
     }
-    
 }
